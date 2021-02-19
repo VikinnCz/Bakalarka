@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <ListView
+        android:id="@+id/ourDeviceList"
+        style="@android:style/Widget.DeviceDefault.Light.ListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:cacheColorHint="@color/cardview_light_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:longClickable="true">
+
+    </ListView>
+
+</LinearLayout>
