@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -43,10 +45,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_ADD_DEVICE= 2;
 
-    BluetoothAdapter mBluetoothAdapter;
+    private BluetoothAdapter mBluetoothAdapter;
     private ArrayList<OurDevice> ourDeviceList = new ArrayList<>();
-    OurDeviceListAdapter mAdapter;
-    ListView mListView;
+    private OurDeviceListAdapter mAdapter;
+    private ListView mListView;
+
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        mAuth = FirebaseAuth.getInstance();
 
         isBluetoothEnable();
         loadData();
@@ -84,10 +90,16 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.add01:
 
-                Intent intent = new Intent(getApplicationContext(), AddDevice.class);
-                startActivityForResult(intent, REQUEST_ADD_DEVICE);
+                Intent intent1 = new Intent(getApplicationContext(), AddDevice.class);
+                startActivityForResult(intent1, REQUEST_ADD_DEVICE);
 
                 break;
+            case R.id.logOut:
+                mAuth.signOut();
+                Intent intent2 = new Intent(this, LogInActivity.class);
+                startActivity(intent2);
+                finish();
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -268,6 +280,11 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     @Override

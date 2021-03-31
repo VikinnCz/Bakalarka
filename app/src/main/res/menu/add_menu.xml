@@ -6,5 +6,9 @@
         android:icon="@drawable/ic_add_black_24dp"
         android:title="add"
         app:showAsAction="ifRoom" />
+    <item android:id="@+id/logOut"
+        android:title="LogOut"
+        app:showAsAction="ifRoom"
+        />
 
 </menu>
