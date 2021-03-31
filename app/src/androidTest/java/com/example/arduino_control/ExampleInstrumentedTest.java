@@ -1,4 +1,4 @@
-package com.example.arduino_control_03;
+package com.example.arduino_control;
 
 import android.content.Context;
 
