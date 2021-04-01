@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
-public class BtControll extends Activity {
+public class BtControlActivity extends Activity {
 
     public SeekBar controller_01;
     public SeekBar controller_02;
@@ -135,7 +135,7 @@ public class BtControll extends Activity {
                 mnSocket.connect();
             } catch (IOException e){
                 Log.e("T", "Could not connect client socket.", e);
-                Toast.makeText(BtControll.this,"Could not connect to client.", Toast.LENGTH_LONG).show();
+                Toast.makeText(BtControlActivity.this,"Could not connect to client.", Toast.LENGTH_LONG).show();
                 try{
                     mnSocket.close();
                     finish();

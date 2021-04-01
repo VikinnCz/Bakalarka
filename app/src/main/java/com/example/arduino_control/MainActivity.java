@@ -6,11 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,47 +31,57 @@ import java.util.UUID;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.gson.Gson;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.reflect.TypeToken;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getName();
     private UUID mDeviceUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     public static final String BLUETOOTH_DEVICE = "BtDevice";
     public static final String DEVICE_UUID = "DeviceUUID";
 
     private static final int REQUEST_ENABLE_BT = 1;
-    private static final int REQUEST_ADD_DEVICE= 2;
+    private static final int REQUEST_ADD_DEVICE = 2;
 
     private BluetoothAdapter mBluetoothAdapter;
+    private User user;
     private ArrayList<OurDevice> ourDeviceList = new ArrayList<>();
     private OurDeviceListAdapter mAdapter;
     private ListView mListView;
 
     private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
+    private FirebaseFirestore dataBase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mAuth = FirebaseAuth.getInstance();
+        dataBase = FirebaseFirestore.getInstance();
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        mAuth = FirebaseAuth.getInstance();
-
         isBluetoothEnable();
+        getUser();
         loadData();
-        buildOurDeviceListView();
-
     }
 
-    public void isBluetoothEnable(){
-        if (!mBluetoothAdapter.isEnabled()){
+    private void getUser() {
+        Intent intent = getIntent();
+        Bundle b = intent.getExtras();
+        currentUser = b.getParcelable("user");
+    }
+
+    public void isBluetoothEnable() {
+        if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            try{
+            try {
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            } catch (Exception e){
-                Toast.makeText(MainActivity.this,"Bluetooth failed", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(MainActivity.this, "Bluetooth failed", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -87,10 +95,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.add01:
 
-                Intent intent1 = new Intent(getApplicationContext(), AddDevice.class);
+                Intent intent1 = new Intent(getApplicationContext(), AddDeviceActivity.class);
                 startActivityForResult(intent1, REQUEST_ADD_DEVICE);
 
                 break;
@@ -107,45 +115,45 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_ENABLE_BT:
 
-                if(resultCode == RESULT_OK){
-                    Toast.makeText(this,"Bluetooth on", Toast.LENGTH_SHORT).show();
+                if (resultCode == RESULT_OK) {
+                    Toast.makeText(this, "Bluetooth on", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
             case REQUEST_ADD_DEVICE:
 
-                if(resultCode == RESULT_OK){
-                    BluetoothDevice device = null;
+                if (resultCode == RESULT_OK) {
+                    String macAddress = null;
                     String ourName = null;
 
                     try {
                         ourName = data.getStringExtra("name");
-                        device = data.getParcelableExtra("device");
+                        macAddress = data.getStringExtra("macAddress");
                     } catch (NullPointerException e) {
                         Log.e("T", "Cant import btDevice from Intent.");
                     }
 
-                    ourDeviceList.add( new OurDevice(device, ourName));
+                    ourDeviceList.add(new OurDevice(macAddress, ourName));
                     mAdapter.notifyDataSetChanged();
                 }
                 break;
         }
     }
 
-    protected void buildOurDeviceListView(){
+    protected void buildOurDeviceListView() {
 
         mListView = findViewById(R.id.ourDeviceList);
 
-        mAdapter = new OurDeviceListAdapter(getApplicationContext(),R.layout.device_item,R.id.BtName,ourDeviceList);
+        mAdapter = new OurDeviceListAdapter(getApplicationContext(), R.layout.device_item, R.id.BtName, ourDeviceList);
         mListView.setAdapter(mAdapter);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                for(int i = 0; i < ourDeviceList.size(); i++){
+                for (int i = 0; i < ourDeviceList.size(); i++) {
                     ourDeviceList.get(i).setColorClicked(getResources().getColor(R.color.cardview_light_background));
                 }
                 ourDeviceList.get(position).setColorClicked(getResources().getColor(R.color.colorClicked));
@@ -153,8 +161,8 @@ public class MainActivity extends AppCompatActivity {
 
                 openDialog();
 
-                Intent intent = new Intent(getApplicationContext(), BtControll.class);
-                intent.putExtra(BLUETOOTH_DEVICE,ourDeviceList.get(position).getDevice());
+                Intent intent = new Intent(getApplicationContext(), BtControlActivity.class);
+                intent.putExtra(BLUETOOTH_DEVICE, mBluetoothAdapter.getRemoteDevice(ourDeviceList.get(position).getMacAddress()));
                 intent.putExtra(DEVICE_UUID, mDeviceUUID.toString());
                 mBluetoothAdapter.cancelDiscovery();
                 startActivity(intent);
@@ -166,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-                builder.setTitle("Delete: "+ ourDeviceList.get(position).getOurName())
+                builder.setTitle("Delete: " + ourDeviceList.get(position).getOurName())
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -227,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 holder = new OurDeviceListAdapter.ViewHolder();
 
                 holder.name = (TextView) v.findViewById(R.id.ourDeviceName);
-                holder.item =(RelativeLayout) v.findViewById(R.id.deviceItem);
+                holder.item = (RelativeLayout) v.findViewById(R.id.deviceItem);
                 holder.item.setBackgroundColor(getResources().getColor(R.color.cardview_light_background));
 
                 v.setTag(holder);
@@ -241,38 +249,59 @@ public class MainActivity extends AppCompatActivity {
             return v;
         }
 
-        private class ViewHolder{
+        private class ViewHolder {
             TextView name;
             RelativeLayout item;
         }
     }
 
-    public void saveData(){
-        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+    public void saveData() {
+//        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        Gson gson = new Gson();
-        String json = gson.toJson(ourDeviceList);
-        editor.putString("device list", json);
-        editor.apply();
+//        Gson gson = new Gson();
+//        String json = gson.toJson(ourDeviceList);
+
+        //save to local
+//        editor.putString("device list", json);
+//        editor.apply();
+
+        //save to firebase
+        User user = new User(ourDeviceList);
+        dataBase.collection("users").document(currentUser.getUid()).set(user).addOnSuccessListener(aVoid -> {
+            Log.d(TAG, "saveData: Data successfully written");
+        }).addOnFailureListener(e -> {
+            Log.w(TAG, "saveData: Error", e);
+        });
+
+        // Kdzyž nemám internet, tak se ani nelognu.
+        //TODO: Save to local and firebase. Need it?
     }
 
-    private void loadData(){
-        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",MODE_PRIVATE);
+    private void loadData() {
+//        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
 
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("device list", null);
-        Type type = new TypeToken<ArrayList<OurDevice>>(){}.getType();
-        ourDeviceList = gson.fromJson(json,type);
-        if (ourDeviceList == null) {
-            ourDeviceList = new ArrayList<>();
-        }
-        for (int i = 0; i<ourDeviceList.size();i++){
-            ourDeviceList.get(i).setDevice(mBluetoothAdapter.getRemoteDevice(ourDeviceList.get(i).getMaddress()));
-        }
+//        Gson gson = new Gson();
+//        String json = sharedPreferences.getString("device list", null);
+        Type type = new TypeToken<ArrayList<OurDevice>>() {
+        }.getType();
+
+        dataBase.collection("users").document(currentUser.getUid()).get().addOnSuccessListener(documentSnapshot -> {
+            user  = documentSnapshot.toObject(User.class);
+            ourDeviceList = user.getOurDeviceList();
+            buildOurDeviceListView();
+
+        }).addOnFailureListener(e->{
+            user = new User(new ArrayList<OurDevice>());
+            ourDeviceList = new ArrayList<OurDevice>();
+            buildOurDeviceListView();
+        });
+
+        // Kdzyž nemám internet, tak se ani nelognu.
+        //TODO: Load from Local if internet not available else load from firebase. Need it?
     }
 
-    protected void openDialog(){
+    protected void openDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 

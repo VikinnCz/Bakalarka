@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 
-public class AddDevice extends Activity {
+public class AddDeviceActivity extends Activity {
 
     BluetoothAdapter mBluetoothAdapter;
     Set<BluetoothDevice> pairedDevices;
@@ -75,7 +75,7 @@ public class AddDevice extends Activity {
         editor.apply();
 
         Intent resultIntent = new Intent();
-        resultIntent.putExtra("device",mDevice);
+        resultIntent.putExtra("macAddress",mDevice.getAddress());
         resultIntent.putExtra("name",ourName);
         setResult(RESULT_OK,resultIntent);
         mBluetoothAdapter.cancelDiscovery();
@@ -116,14 +116,12 @@ public class AddDevice extends Activity {
         pairedDevices = mBluetoothAdapter.getBondedDevices();
         int size = pairedDeviceList.size();
 
-        for (int i = 0; i< size ;i++){
-            pairedDeviceList.remove(0);
+        if (size > 0) {
+            pairedDeviceList.clear();
         }
 
         if(pairedDevices.size()>0){
-            for(BluetoothDevice device : pairedDevices) {
-                pairedDeviceList.add(device);
-            }
+            pairedDeviceList.addAll(pairedDevices);
         }
         PairedDeviceAdapter mAdapter = new PairedDeviceAdapter(getApplicationContext(),R.layout.list_item,R.id.BtName, pairedDeviceList);
         mListView.setAdapter(mAdapter);

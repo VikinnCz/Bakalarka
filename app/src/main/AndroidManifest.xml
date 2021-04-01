@@ -21,8 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.arduino_control.BtControll" />
-        <activity android:name="com.example.arduino_control.AddDevice" />
+        <activity android:name="com.example.arduino_control.BtControlActivity" />
+        <activity android:name="com.example.arduino_control.AddDeviceActivity" />
         <activity android:name="com.example.arduino_control.MainActivity" />
     </application>
 
