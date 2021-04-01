@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.add_menu, menu);
+        inflater.inflate(R.menu.menu_add, menu);
         return true;
     }
 
@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
         mListView = findViewById(R.id.ourDeviceList);
 
-        mAdapter = new OurDeviceListAdapter(getApplicationContext(), R.layout.device_item, R.id.BtName, ourDeviceList);
+        mAdapter = new OurDeviceListAdapter(getApplicationContext(), R.layout.item_device, R.id.BtName, ourDeviceList);
         mListView.setAdapter(mAdapter);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
             View v = convertView;
             OurDeviceListAdapter.ViewHolder holder;
             if (convertView == null) {
-                v = LayoutInflater.from(context).inflate(R.layout.device_item, null);
+                v = LayoutInflater.from(context).inflate(R.layout.item_device, null);
                 holder = new OurDeviceListAdapter.ViewHolder();
 
                 holder.name = (TextView) v.findViewById(R.id.ourDeviceName);

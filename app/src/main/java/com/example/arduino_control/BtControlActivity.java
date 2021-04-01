@@ -32,7 +32,7 @@ public class BtControlActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.controling_activity);
+        setContentView(R.layout.activity_bt_control);
 
         controller_01 = findViewById(R.id.controller_01);
         controller_02 = findViewById(R.id.controller_02);

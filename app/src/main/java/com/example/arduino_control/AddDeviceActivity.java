@@ -43,7 +43,7 @@ public class AddDeviceActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_device_activity);
+        setContentView(R.layout.activity_add_device);
 
         mListView = findViewById(R.id.deviceList);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -123,7 +123,7 @@ public class AddDeviceActivity extends Activity {
         if(pairedDevices.size()>0){
             pairedDeviceList.addAll(pairedDevices);
         }
-        PairedDeviceAdapter mAdapter = new PairedDeviceAdapter(getApplicationContext(),R.layout.list_item,R.id.BtName, pairedDeviceList);
+        PairedDeviceAdapter mAdapter = new PairedDeviceAdapter(getApplicationContext(),R.layout.item_list,R.id.BtName, pairedDeviceList);
         mListView.setAdapter(mAdapter);
 
     }
@@ -161,7 +161,7 @@ public class AddDeviceActivity extends Activity {
             View v = convertView;
             PairedDeviceAdapter.ViewHolder holder;
             if (convertView == null) {
-                v = LayoutInflater.from(context).inflate(R.layout.list_item, null);
+                v = LayoutInflater.from(context).inflate(R.layout.item_list, null);
                 holder = new PairedDeviceAdapter.ViewHolder();
 
                 holder.name = (TextView) v.findViewById(R.id.BtName);
