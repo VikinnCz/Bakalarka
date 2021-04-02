@@ -3,12 +3,15 @@ package com.example.arduino_control;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,6 +46,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_ADD_DEVICE = 2;
+    private static final int CAMERA_PERMISSION_CODE = 1;
+
+    private boolean permissionGranted = false;
+    private boolean isPermissionRequestedFromMenu = false;
 
     private BluetoothAdapter mBluetoothAdapter;
     private User user;
@@ -62,11 +69,54 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         dataBase = FirebaseFirestore.getInstance();
 
+        isPermissionRequestedFromMenu = false;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
 
         isBluetoothEnable();
         getUser();
         loadData();
+        getPermission();
+    }
+
+    public void getPermission() {
+        if (this.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (this.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                        .setTitle("Potřebné oprávnění")
+                        .setMessage("Aplikace vyžaduje přístup ke kameře aby mohla správně fungovat.")
+                        .setPositiveButton("Příjmout", (dialog, which) ->
+                                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE))
+                        .setNegativeButton("Odmítnou", (dialog, which) -> {
+                            dialog.dismiss();
+                            finish();
+                        })
+                        .setOnCancelListener((dialog) -> finish());
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            } else {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+            }
+        } else {
+            permissionGranted = true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                permissionGranted = true;
+            } else {
+                if (!isPermissionRequestedFromMenu) {
+                    permissionGranted = false;
+                    getPermission();
+                    return;
+                }
+                permissionGranted = false;
+            }
+        }
     }
 
     private void getUser() {
