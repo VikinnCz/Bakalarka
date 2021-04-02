@@ -48,9 +48,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_ADD_DEVICE = 2;
     private static final int CAMERA_PERMISSION_CODE = 1;
 
-    private boolean permissionGranted = false;
-    private boolean isPermissionRequestedFromMenu = false;
-
     private BluetoothAdapter mBluetoothAdapter;
     private User user;
     private ArrayList<OurDevice> ourDeviceList = new ArrayList<>();
@@ -68,8 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         dataBase = FirebaseFirestore.getInstance();
-
-        isPermissionRequestedFromMenu = false;
+        
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 
@@ -97,8 +93,6 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
             }
-        } else {
-            permissionGranted = true;
         }
     }
 
@@ -106,15 +100,8 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                permissionGranted = true;
-            } else {
-                if (!isPermissionRequestedFromMenu) {
-                    permissionGranted = false;
-                    getPermission();
-                    return;
-                }
-                permissionGranted = false;
+            if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                getPermission();
             }
         }
     }
