@@ -6,12 +6,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,7 +42,7 @@ import com.google.gson.reflect.TypeToken;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getName();
-    private UUID mDeviceUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private final UUID mDeviceUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     public static final String BLUETOOTH_DEVICE = "BtDevice";
     public static final String DEVICE_UUID = "DeviceUUID";
 
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         dataBase = FirebaseFirestore.getInstance();
-        
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 
@@ -187,50 +189,38 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new OurDeviceListAdapter(getApplicationContext(), R.layout.item_device, R.id.BtName, ourDeviceList);
         mListView.setAdapter(mAdapter);
 
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                for (int i = 0; i < ourDeviceList.size(); i++) {
-                    ourDeviceList.get(i).setColorClicked(getResources().getColor(R.color.cardview_light_background));
-                }
-                ourDeviceList.get(position).setColorClicked(getResources().getColor(R.color.colorClicked));
-                mAdapter.notifyDataSetChanged();
-
-                openDialog();
-
-                Intent intent = new Intent(getApplicationContext(), BtControlActivity.class);
-                intent.putExtra(BLUETOOTH_DEVICE, mBluetoothAdapter.getRemoteDevice(ourDeviceList.get(position).getMacAddress()));
-                intent.putExtra(DEVICE_UUID, mDeviceUUID.toString());
-                mBluetoothAdapter.cancelDiscovery();
-                startActivity(intent);
+        mListView.setOnItemClickListener((parent, view, position, id) -> {
+            for (int i = 0; i < ourDeviceList.size(); i++) {
+                ourDeviceList.get(i).setColorClicked(getResources().getColor(R.color.cardview_light_background, getTheme()));
             }
+            ourDeviceList.get(position).setColorClicked(getResources().getColor(R.color.colorClicked, getTheme()));
+            mAdapter.notifyDataSetChanged();
+
+            openDialog();
+
+            Intent intent = new Intent(getApplicationContext(), BtControlActivity.class);
+            intent.putExtra(BLUETOOTH_DEVICE, mBluetoothAdapter.getRemoteDevice(ourDeviceList.get(position).getMacAddress()));
+            intent.putExtra(DEVICE_UUID, mDeviceUUID.toString());
+            mBluetoothAdapter.cancelDiscovery();
+            startActivity(intent);
         });
 
-        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        mListView.setOnItemLongClickListener((parent, view, position, id) -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-                builder.setTitle("Delete: " + ourDeviceList.get(position).getOurName())
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+            builder.setTitle("Delete: " + ourDeviceList.get(position).getOurName())
+                    .setNegativeButton("No", (dialog, which) -> {
 
-                            }
-                        })
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ourDeviceList.remove(position);
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
+                    })
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        ourDeviceList.remove(position);
+                        mAdapter.notifyDataSetChanged();
+                    });
 
-                AlertDialog dialog = builder.create();
-                dialog.show();
+            AlertDialog dialog = builder.create();
+            dialog.show();
 
-                return true;
-            }
+            return true;
         });
     }
 
@@ -268,12 +258,12 @@ public class MainActivity extends AppCompatActivity {
             View v = convertView;
             OurDeviceListAdapter.ViewHolder holder;
             if (convertView == null) {
-                v = LayoutInflater.from(context).inflate(R.layout.item_device, null);
+                v = LayoutInflater.from(context).inflate(R.layout.item_device, parent, false);
                 holder = new OurDeviceListAdapter.ViewHolder();
 
                 holder.name = (TextView) v.findViewById(R.id.ourDeviceName);
                 holder.item = (RelativeLayout) v.findViewById(R.id.deviceItem);
-                holder.item.setBackgroundColor(getResources().getColor(R.color.cardview_light_background));
+                holder.item.setBackgroundColor(getResources().getColor(R.color.cardview_light_background, getTheme()));
 
                 v.setTag(holder);
             } else {
@@ -293,49 +283,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void saveData() {
-//        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-//        Gson gson = new Gson();
-//        String json = gson.toJson(ourDeviceList);
-
-        //save to local
-//        editor.putString("device list", json);
-//        editor.apply();
-
-        //save to firebase
         User user = new User(ourDeviceList);
-        dataBase.collection("users").document(currentUser.getUid()).set(user).addOnSuccessListener(aVoid -> {
-            Log.d(TAG, "saveData: Data successfully written");
-        }).addOnFailureListener(e -> {
-            Log.w(TAG, "saveData: Error", e);
-        });
-
-        // Kdzyž nemám internet, tak se ani nelognu.
-        //TODO: Save to local and firebase. Need it?
+        dataBase.collection("users").document(currentUser.getUid()).set(user)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "saveData: Data successfully written"))
+                .addOnFailureListener(e -> Log.w(TAG, "saveData: Error", e));
     }
 
     private void loadData() {
-//        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
-
-//        Gson gson = new Gson();
-//        String json = sharedPreferences.getString("device list", null);
-        Type type = new TypeToken<ArrayList<OurDevice>>() {
-        }.getType();
 
         dataBase.collection("users").document(currentUser.getUid()).get().addOnSuccessListener(documentSnapshot -> {
-            user  = documentSnapshot.toObject(User.class);
+            user = documentSnapshot.toObject(User.class);
             ourDeviceList = user.getOurDeviceList();
             buildOurDeviceListView();
 
-        }).addOnFailureListener(e->{
-            user = new User(new ArrayList<OurDevice>());
-            ourDeviceList = new ArrayList<OurDevice>();
+        }).addOnFailureListener(e -> {
+            user = new User(new ArrayList<>());
+            ourDeviceList = new ArrayList<>();
             buildOurDeviceListView();
         });
-
-        // Kdzyž nemám internet, tak se ani nelognu.
-        //TODO: Load from Local if internet not available else load from firebase. Need it?
     }
 
     protected void openDialog() {
