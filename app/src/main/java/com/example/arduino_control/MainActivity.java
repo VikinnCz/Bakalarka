@@ -134,19 +134,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.add01:
-
-                Intent intent1 = new Intent(getApplicationContext(), AddDeviceActivity.class);
-                startActivityForResult(intent1, REQUEST_ADD_DEVICE);
-
-                break;
-            case R.id.logOut:
-                mAuth.signOut();
-                Intent intent2 = new Intent(this, LogInActivity.class);
-                startActivity(intent2);
-                finish();
-
+        int id = item.getItemId();
+        if (id == R.id.add01) {
+            Intent intent1 = new Intent(getApplicationContext(), AddDeviceActivity.class);
+            startActivityForResult(intent1, REQUEST_ADD_DEVICE);
+        } else if (id == R.id.logOut) {
+            mAuth.signOut();
+            Intent intent2 = new Intent(this, LogInActivity.class);
+            startActivity(intent2);
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }
