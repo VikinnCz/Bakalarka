@@ -1,4 +1,4 @@
-package com.example.arduino_control;
+package com.example.arduino_control.activity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -6,15 +6,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,22 +20,22 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.arduino_control.OurDevice;
+import com.example.arduino_control.R;
+import com.example.arduino_control.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.gson.reflect.TypeToken;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -195,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
             openDialog();
 
             Intent intent = new Intent(getApplicationContext(), BtControlActivity.class);
-            intent.putExtra(BLUETOOTH_DEVICE, mBluetoothAdapter.getRemoteDevice(ourDeviceList.get(position).getMacAddress()));
+            intent.putExtra(BLUETOOTH_DEVICE, (Parcelable) ourDeviceList.get(position));
             intent.putExtra(DEVICE_UUID, mDeviceUUID.toString());
             mBluetoothAdapter.cancelDiscovery();
             startActivity(intent);

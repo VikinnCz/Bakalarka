@@ -1,11 +1,9 @@
-package com.example.arduino_control;
+package com.example.arduino_control.activity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
+import com.example.arduino_control.R;
 import com.example.arduino_control.ui.main.SectionsPagerAdapter;
 import com.google.android.material.tabs.TabLayout;
 

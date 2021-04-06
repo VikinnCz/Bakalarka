@@ -1,4 +1,4 @@
-package com.example.arduino_control;
+package com.example.arduino_control.activity;
 
 import android.app.Activity;
 
@@ -11,6 +11,9 @@ import android.util.Log;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.example.arduino_control.OurDevice;
+import com.example.arduino_control.R;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
@@ -20,7 +23,8 @@ public class BtControlActivity extends Activity {
     public SeekBar controller_01;
     public SeekBar controller_02;
     public SeekBar controller_03;
-    public BluetoothDevice mDevice;
+    private OurDevice ourDevice;
+    public BluetoothDevice BtDevice;
     public ConnectingToBT c;
     public ManageConnection manager;
 
@@ -40,16 +44,19 @@ public class BtControlActivity extends Activity {
 
         Intent intent = getIntent();
         Bundle b = intent.getExtras();
-        mDevice = b.getParcelable(MainActivity.BLUETOOTH_DEVICE);
+        ourDevice = b.getParcelable(MainActivity.BLUETOOTH_DEVICE);
         mDeviceUUID = UUID.fromString(b.getString(MainActivity.DEVICE_UUID));
 
         startConnecting();
 
         sendData();
+//      TODO: predelat na async with Thread waiting for connection.
+//      TODO: then check if device is set or no
+//      TODO: create introduction to set device if is not set
     }
 
     public void startConnecting(){
-        c = new ConnectingToBT(mDevice);
+        c = new ConnectingToBT(BtDevice);
         c.run();
     }
 
@@ -179,6 +186,7 @@ public class BtControlActivity extends Activity {
 
             mmOutputStream = tmpOut;
         }
+
 
 
         public void write(byte[] bytes){

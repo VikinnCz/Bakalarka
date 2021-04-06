@@ -7,8 +7,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.arduino_control.BtScanFragment;
-import com.example.arduino_control.QrScanFragment;
+import com.example.arduino_control.fragment.BtScanFragment;
+import com.example.arduino_control.fragment.QrScanFragment;
 
 
 /**

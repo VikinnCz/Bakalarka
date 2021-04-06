@@ -1,4 +1,4 @@
-package com.example.arduino_control;
+package com.example.arduino_control.fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,14 +14,12 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
-import com.budiyev.android.codescanner.DecodeCallback;
-import com.budiyev.android.codescanner.ScanMode;
-import com.google.zxing.Result;
+import com.example.arduino_control.R;
+import com.example.arduino_control.activity.AddDeviceActivity;
 
 public class QrScanFragment extends Fragment {
 
