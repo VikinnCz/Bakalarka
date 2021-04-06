@@ -190,10 +190,10 @@ public class MainActivity extends AppCompatActivity {
             ourDeviceList.get(position).setColorClicked(getResources().getColor(R.color.colorClicked, getTheme()));
             mAdapter.notifyDataSetChanged();
 
-            openDialog();
+//            openDialog();
 
-            Intent intent = new Intent(getApplicationContext(), BtControlActivity.class);
-            intent.putExtra(BLUETOOTH_DEVICE, (Parcelable) ourDeviceList.get(position));
+            Intent intent = new Intent(this, BtControlActivity.class);
+            intent.putExtra(BLUETOOTH_DEVICE, ourDeviceList.get(position));
             intent.putExtra(DEVICE_UUID, mDeviceUUID.toString());
             mBluetoothAdapter.cancelDiscovery();
             startActivity(intent);

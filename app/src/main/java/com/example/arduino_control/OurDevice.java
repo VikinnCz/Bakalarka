@@ -1,6 +1,8 @@
 package com.example.arduino_control;
 
-public class OurDevice {
+import java.io.Serializable;
+
+public class OurDevice implements Serializable {
 
     private String ourName;
     private String macAddress;
