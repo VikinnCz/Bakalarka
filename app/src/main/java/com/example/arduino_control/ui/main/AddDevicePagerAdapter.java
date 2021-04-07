@@ -15,9 +15,9 @@ import com.example.arduino_control.fragment.QrScanFragment;
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-public class SectionsPagerAdapter extends FragmentPagerAdapter {
+public class AddDevicePagerAdapter extends FragmentPagerAdapter {
 
-    public SectionsPagerAdapter(Context context, FragmentManager fm) {
+    public AddDevicePagerAdapter(Context context, FragmentManager fm) {
         super(fm);
     }
 

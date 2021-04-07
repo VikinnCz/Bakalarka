@@ -108,18 +108,12 @@ public class BtScanFragment extends Fragment {
 
         builder.setView(view)
                 .setTitle("Rename")
-                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                .setNegativeButton("cancel", (dialog, which) -> {
 
-                    }
                 })
-                .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ourName = mOurName.getText().toString();
-                        cancel();
-                    }
+                .setPositiveButton("ok", (dialog, which) -> {
+                    ourName = mOurName.getText().toString();
+                    cancel();
                 });
 
         AlertDialog dialog = builder.create();

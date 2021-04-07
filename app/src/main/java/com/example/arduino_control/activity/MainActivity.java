@@ -190,8 +190,6 @@ public class MainActivity extends AppCompatActivity {
             ourDeviceList.get(position).setColorClicked(getResources().getColor(R.color.colorClicked, getTheme()));
             mAdapter.notifyDataSetChanged();
 
-//            openDialog();
-
             Intent intent = new Intent(this, BtControlActivity.class);
             intent.putExtra(BLUETOOTH_DEVICE, ourDeviceList.get(position));
             intent.putExtra(DEVICE_UUID, mDeviceUUID.toString());
@@ -295,16 +293,6 @@ public class MainActivity extends AppCompatActivity {
             ourDeviceList = new ArrayList<>();
             buildOurDeviceListView();
         });
-    }
-
-    protected void openDialog() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setTitle("Loading");
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 
     @Override

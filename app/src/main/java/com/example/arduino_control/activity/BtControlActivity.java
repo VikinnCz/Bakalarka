@@ -10,6 +10,9 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -21,10 +24,14 @@ import com.example.arduino_control.R;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
+import java.util.zip.Inflater;
 
 public class BtControlActivity extends AppCompatActivity {
 
     private static final String TAG = BtControlActivity.class.getName();
+    private static final String KNOB_1_MIN = "0\n";
+    private static final String KNOB_2_MIN = "181\n";
+    private static final String KNOB_3_MIN = "361\n";
 
     private SeekBar controller_01;
     private SeekBar controller_02;
@@ -54,8 +61,7 @@ public class BtControlActivity extends AppCompatActivity {
 
         startConnecting();
 
-//      TODO: predelat na async with Thread waiting for connection.
-//      TODO: then check if device is set or no
+//      TODO: check if device is set or no
 //      TODO: create introduction to set device if is not set
     }
 
@@ -71,8 +77,8 @@ public class BtControlActivity extends AppCompatActivity {
                 Log.d(TAG, "Connecting: " + i);
                 if (c.isConnect()) {
                     runOnUiThread(() -> {
-                        setView();
                         mDialog.dismiss();
+                        setView();
                     });
                     return;
                 }
@@ -96,13 +102,27 @@ public class BtControlActivity extends AppCompatActivity {
     }
 
     private void setView() {
-        setContentView(R.layout.activity_bt_control);
 
-        controller_01 = findViewById(R.id.controller_01);
-        controller_02 = findViewById(R.id.controller_02);
-        controller_03 = findViewById(R.id.controller_03);
+//        setContentView(R.layout.activity_bt_control);
+//
+//        controller_01 = findViewById(R.id.controller_01);
+//        controller_02 = findViewById(R.id.controller_02);
+//        controller_03 = findViewById(R.id.controller_03);
+//
+//                    sendData();
 
-        sendData();
+
+        if(ourDevice.isSet) {
+            setContentView(R.layout.activity_bt_control);
+
+            controller_01 = findViewById(R.id.controller_01);
+            controller_02 = findViewById(R.id.controller_02);
+            controller_03 = findViewById(R.id.controller_03);
+
+            sendData();
+        } else {
+            openDialogSetNewDevice();
+    }
     }
 
     public void sendData() {
@@ -169,6 +189,108 @@ public class BtControlActivity extends AppCompatActivity {
 
         mDialog = builder.create();
         mDialog.show();
+    }
+
+    private void openDialogSetNewDevice() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Nejprve je potřeba vše nastavit");
+        builder.setMessage("Sundejte zařízení s efektu a okotče knoby na minimul do leva. Následně stiskněte ok.");
+        builder.setPositiveButton("Ok", ((dialog, which) -> {
+            manager.write(KNOB_1_MIN.getBytes());
+            manager.write(KNOB_2_MIN.getBytes());
+            manager.write(KNOB_3_MIN.getBytes());
+            openDialogPutDevice();
+        }));
+        builder.setCancelable(false);
+        mDialog = builder.create();
+        mDialog.show();
+
+    }
+
+    private void openDialogPutDevice(){
+        mDialog.dismiss();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Nasaďte zařízení na efekt");
+        builder.setMessage("Nasaďte serva na knoby");
+        builder.setPositiveButton("Ok", ((dialog, which) -> openDialogSetKnob1()));
+        builder.setCancelable(false);
+        mDialog = builder.create();
+        mDialog.show();
+    }
+
+    private void openDialogSetKnob1(){
+        mDialog.dismiss();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_set_knob_1, null);
+
+        EditText knob1Name = view.findViewById(R.id.nameKnob1);
+        SeekBar knob1Max = view.findViewById(R.id.maxKnob1);
+
+        knob1Max.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                data = progress + "\n";
+                manager.write(data.getBytes());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        builder.setView(view);
+        builder.setTitle("Nastavte maximálni hodnotu knobu 1");
+        builder.setMessage("Pomalu posunujte slidrem z leva do prava než dojedete na maximální úhel otočení vašeho knobu. Následně stiskněte ok.");
+        builder.setPositiveButton("Ok", ((dialog, which) -> {
+            ourDevice.getMax().set(0,knob1Max.getProgress());
+            ourDevice.getNames().set(0,knob1Name.getText().toString());
+        }));
+        builder.setCancelable(false);
+        mDialog = builder.create();
+        mDialog.show();
+    }
+
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        c.test();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        try {
+            c.cancel();
+            manager.cancel();
+        } catch (NullPointerException e) {
+            Log.d(TAG, "onDestroy: socket is canceled");
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        try {
+            c.cancel();
+            manager.cancel();
+        } catch (NullPointerException e) {
+            Log.d(TAG, "onDestroy: socket is canceled");
+        }
+        super.onBackPressed();
     }
 
     private class ConnectingToBT extends Thread {
@@ -271,40 +393,5 @@ public class BtControlActivity extends AppCompatActivity {
                 Log.e(TAG, "Could not close the connect socket");
             }
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        c.test();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-//        c.cancel();
-//        manager.cancel();
-    }
-
-    @Override
-    protected void onDestroy() {
-        try {
-            c.cancel();
-            manager.cancel();
-        } catch (NullPointerException e){
-            Log.d(TAG, "onDestroy: socket is canceled");
-        }
-        super.onDestroy();
-    }
-
-    @Override
-    public void onBackPressed() {
-        try {
-            c.cancel();
-            manager.cancel();
-        } catch (NullPointerException e){
-            Log.d(TAG, "onDestroy: socket is canceled");
-        }
-        super.onBackPressed();
     }
 }
