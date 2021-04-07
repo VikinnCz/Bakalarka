@@ -13,6 +13,8 @@ import android.util.Log;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.arduino_control.OurDevice;
 import com.example.arduino_control.R;
 
@@ -20,7 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
-public class BtControlActivity extends Activity {
+public class BtControlActivity extends AppCompatActivity {
 
     private static final String TAG = BtControlActivity.class.getName();
 
@@ -31,7 +33,7 @@ public class BtControlActivity extends Activity {
     private BluetoothDevice btDevice;
     private ConnectingToBT c;
     private ManageConnection manager;
-    private Dialog mDialog;
+    Dialog mDialog;
 
     private UUID mDeviceUUID;
 
@@ -43,12 +45,12 @@ public class BtControlActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_empty);
 
-        openDialogConnecting();
-
         Intent intent = getIntent();
         Bundle b = intent.getExtras();
         ourDevice = (OurDevice) intent.getSerializableExtra(MainActivity.BLUETOOTH_DEVICE);
         mDeviceUUID = UUID.fromString(b.getString(MainActivity.DEVICE_UUID));
+
+        openDialogConnecting();
 
         startConnecting();
 
@@ -60,8 +62,11 @@ public class BtControlActivity extends Activity {
     public void startConnecting() {
         btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(ourDevice.getMacAddress());
         c = new ConnectingToBT(btDevice);
-        c.run();
+        new Thread(() -> {
+            c.run();
+        }).start();
         Log.d(TAG, "startConnecting: ");
+        new Thread(() -> {
             for (int i = 0; i <= 50; i++) {
                 Log.d(TAG, "Connecting: " + i);
                 if (c.isConnect()) {
@@ -87,9 +92,10 @@ public class BtControlActivity extends Activity {
                 mDialog = builder.create();
                 mDialog.show();
             });
+        }).start();
     }
 
-    private void setView(){
+    private void setView() {
         setContentView(R.layout.activity_bt_control);
 
         controller_01 = findViewById(R.id.controller_01);
@@ -192,12 +198,13 @@ public class BtControlActivity extends Activity {
                 Log.d(TAG, "run: Connected");
             } catch (IOException e) {
                 Log.e(TAG, "Could not connect client socket.", e);
-                Toast.makeText(BtControlActivity.this, "Could not connect to client.", Toast.LENGTH_LONG).show();
+//                runOnUiThread(()->Toast.makeText(BtControlActivity.this, "Could not connect to client.", Toast.LENGTH_LONG).show());
                 try {
                     mnSocket.close();
-                    finish();
+                    return;
                 } catch (IOException ee) {
                     Log.e(TAG, "Could not close the client socket.", ee);
+                    return;
                 }
             }
             manager = new ManageConnection(mnSocket);
@@ -275,21 +282,29 @@ public class BtControlActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        c.cancel();
-        manager.cancel();
+//        c.cancel();
+//        manager.cancel();
     }
 
     @Override
     protected void onDestroy() {
-        c.cancel();
-        manager.cancel();
+        try {
+            c.cancel();
+            manager.cancel();
+        } catch (NullPointerException e){
+            Log.d(TAG, "onDestroy: socket is canceled");
+        }
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
-        c.cancel();
-        manager.cancel();
+        try {
+            c.cancel();
+            manager.cancel();
+        } catch (NullPointerException e){
+            Log.d(TAG, "onDestroy: socket is canceled");
+        }
         super.onBackPressed();
     }
 }
