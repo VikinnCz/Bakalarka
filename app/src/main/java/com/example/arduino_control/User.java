@@ -1,8 +1,9 @@
 package com.example.arduino_control;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class User {
+public class User implements Serializable {
 
     private ArrayList<OurDevice> ourDeviceList;
 

@@ -1,33 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/knob1NameView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/controller_01"
+        app:layout_constraintStart_toStartOf="@+id/controller_01" />
 
     <SeekBar
         android:id="@+id/controller_01"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:max="180"
         android:min="0"
-        android:progress="0" />
+        android:progress="0"
+        android:visibility="invisible"
+        android:clickable="false"
+        app:layout_constraintBottom_toTopOf="@+id/controller_02"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/knob2NameView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/controller_02"
+        app:layout_constraintStart_toStartOf="@+id/controller_02" />
 
     <SeekBar
         android:id="@+id/controller_02"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:max="360"
         android:min="181"
-        android:progress="181" />
+        android:progress="181"
+        android:visibility="invisible"
+        android:clickable="false"
+        app:layout_constraintBottom_toTopOf="@+id/controller_03"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/controller_01" />
+
+    <TextView
+        android:id="@+id/knob3NameView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/controller_03"
+        app:layout_constraintStart_toStartOf="@+id/controller_03" />
 
     <SeekBar
         android:id="@+id/controller_03"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:max="540"
         android:min="361"
-        android:progress="361" />
-</LinearLayout>
+        android:progress="361"
+        android:visibility="invisible"
+        android:clickable="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/controller_02" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

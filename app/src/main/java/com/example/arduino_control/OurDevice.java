@@ -11,6 +11,7 @@ public class OurDevice implements Serializable {
     private ArrayList<String> names;
     public boolean isSet;
     private int colorClicked;
+    private int knobs;
 
 
     public OurDevice(String macAddress, String ourName){
@@ -28,6 +29,7 @@ public class OurDevice implements Serializable {
     }
 
     public OurDevice(){
+
     }
 
     public void setOurName(String ourName) {
@@ -40,6 +42,10 @@ public class OurDevice implements Serializable {
 
     public void setColorClicked(int colorClicked) {
         this.colorClicked = colorClicked;
+    }
+
+    public void setKnobs(int knobs){
+        this.knobs = knobs;
     }
 
     public String getOurName() {
@@ -60,5 +66,9 @@ public class OurDevice implements Serializable {
 
     public ArrayList<String> getNames(){
         return names;
+    }
+
+    public int getKnobs(){
+        return knobs;
     }
 }

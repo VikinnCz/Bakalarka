@@ -9,17 +9,23 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.arduino_control.OurDevice;
 import com.example.arduino_control.R;
+import com.example.arduino_control.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,11 +39,15 @@ public class BtControlActivity extends AppCompatActivity {
     private static final String KNOB_2_MIN = "181\n";
     private static final String KNOB_3_MIN = "361\n";
 
-    private SeekBar controller_01;
-    private SeekBar controller_02;
-    private SeekBar controller_03;
-    private OurDevice ourDevice;
+    public SeekBar controller_01;
+    public SeekBar controller_02;
+    public SeekBar controller_03;
+    public TextView knob1NameView;
+    public TextView knob2NameView;
+    public TextView knob3NameView;
+    private User user;
     private BluetoothDevice btDevice;
+    private OurDevice ourDevice;
     private ConnectingToBT c;
     private ManageConnection manager;
     Dialog mDialog;
@@ -45,6 +55,7 @@ public class BtControlActivity extends AppCompatActivity {
     private UUID mDeviceUUID;
 
     String data;
+    public int positionInDeviceList;
 
 
     @Override
@@ -54,19 +65,18 @@ public class BtControlActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         Bundle b = intent.getExtras();
-        ourDevice = (OurDevice) intent.getSerializableExtra(MainActivity.BLUETOOTH_DEVICE);
+        user = (User) intent.getSerializableExtra(MainActivity.USER);
+        positionInDeviceList = b.getInt(MainActivity.POSITION);
         mDeviceUUID = UUID.fromString(b.getString(MainActivity.DEVICE_UUID));
+        ourDevice = user.getOurDeviceList().get(positionInDeviceList);
 
         openDialogConnecting();
 
         startConnecting();
-
-//      TODO: check if device is set or no
-//      TODO: create introduction to set device if is not set
     }
 
     public void startConnecting() {
-        btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(ourDevice.getMacAddress());
+        btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(user.getOurDeviceList().get(positionInDeviceList).getMacAddress());
         c = new ConnectingToBT(btDevice);
         new Thread(() -> {
             c.run();
@@ -78,7 +88,7 @@ public class BtControlActivity extends AppCompatActivity {
                 if (c.isConnect()) {
                     runOnUiThread(() -> {
                         mDialog.dismiss();
-                        setView();
+                        isDeviceSet();
                     });
                     return;
                 }
@@ -101,28 +111,72 @@ public class BtControlActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void setView() {
-
-//        setContentView(R.layout.activity_bt_control);
-//
-//        controller_01 = findViewById(R.id.controller_01);
-//        controller_02 = findViewById(R.id.controller_02);
-//        controller_03 = findViewById(R.id.controller_03);
-//
-//                    sendData();
-
-
-        if(ourDevice.isSet) {
-            setContentView(R.layout.activity_bt_control);
-
-            controller_01 = findViewById(R.id.controller_01);
-            controller_02 = findViewById(R.id.controller_02);
-            controller_03 = findViewById(R.id.controller_03);
-
-            sendData();
+    public void isDeviceSet() {
+        if (ourDevice.isSet) {
+            setView();
         } else {
             openDialogSetNewDevice();
+        }
     }
+
+    private void setView() {
+
+        setContentView(R.layout.activity_bt_control);
+
+        knob1NameView = findViewById(R.id.knob1NameView);
+        knob2NameView = findViewById(R.id.knob2NameView);
+        knob3NameView = findViewById(R.id.knob3NameView);
+        controller_01 = findViewById(R.id.controller_01);
+        controller_02 = findViewById(R.id.controller_02);
+        controller_03 = findViewById(R.id.controller_03);
+
+        switch (ourDevice.getKnobs()) {
+            case 1:
+                knob1NameView.setText(ourDevice.getNames().get(0));
+                controller_01.setMax(ourDevice.getMax().get(0));
+
+                knob1NameView.setVisibility(View.VISIBLE);
+                controller_01.setVisibility(View.VISIBLE);
+                controller_01.setClickable(true);
+
+                break;
+            case 2:
+                knob1NameView.setText(ourDevice.getNames().get(0));
+                knob2NameView.setText(ourDevice.getNames().get(1));
+                controller_01.setMax(ourDevice.getMax().get(0));
+                controller_02.setMax(ourDevice.getMax().get(1));
+
+                knob1NameView.setVisibility(View.VISIBLE);
+                controller_01.setVisibility(View.VISIBLE);
+                controller_01.setClickable(true);
+
+                knob2NameView.setVisibility(View.VISIBLE);
+                controller_02.setVisibility(View.VISIBLE);
+                controller_02.setClickable(true);
+                break;
+            case 3:
+                knob1NameView.setText(ourDevice.getNames().get(0));
+                knob2NameView.setText(ourDevice.getNames().get(1));
+                knob3NameView.setText(ourDevice.getNames().get(2));
+                controller_01.setMax(ourDevice.getMax().get(0));
+                controller_02.setMax(ourDevice.getMax().get(1));
+                controller_03.setMax(ourDevice.getMax().get(2));
+
+                knob1NameView.setVisibility(View.VISIBLE);
+                controller_01.setVisibility(View.VISIBLE);
+                controller_01.setClickable(true);
+
+                knob2NameView.setVisibility(View.VISIBLE);
+                controller_02.setVisibility(View.VISIBLE);
+                controller_02.setClickable(true);
+
+                knob3NameView.setVisibility(View.VISIBLE);
+                controller_03.setVisibility(View.VISIBLE);
+                controller_03.setClickable(true);
+                break;
+        }
+
+        sendData();
     }
 
     public void sendData() {
@@ -207,7 +261,7 @@ public class BtControlActivity extends AppCompatActivity {
 
     }
 
-    private void openDialogPutDevice(){
+    private void openDialogPutDevice() {
         mDialog.dismiss();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Nasaďte zařízení na efekt");
@@ -218,7 +272,7 @@ public class BtControlActivity extends AppCompatActivity {
         mDialog.show();
     }
 
-    private void openDialogSetKnob1(){
+    private void openDialogSetKnob1() {
         mDialog.dismiss();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -250,15 +304,120 @@ public class BtControlActivity extends AppCompatActivity {
         builder.setTitle("Nastavte maximálni hodnotu knobu 1");
         builder.setMessage("Pomalu posunujte slidrem z leva do prava než dojedete na maximální úhel otočení vašeho knobu. Následně stiskněte ok.");
         builder.setPositiveButton("Ok", ((dialog, which) -> {
-            ourDevice.getMax().set(0,knob1Max.getProgress());
-            ourDevice.getNames().set(0,knob1Name.getText().toString());
+            ourDevice.getMax().set(0, knob1Max.getProgress());
+            ourDevice.getNames().set(0, knob1Name.getText().toString());
+            openDialogSetKnob2();
         }));
         builder.setCancelable(false);
         mDialog = builder.create();
         mDialog.show();
     }
 
+    private void openDialogSetKnob2() {
+        mDialog.dismiss();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
+        LayoutInflater inflater = this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_set_knob_2, null);
+
+        EditText knob2Name = view.findViewById(R.id.nameKnob2);
+        SeekBar knob2Max = view.findViewById(R.id.maxKnob2);
+
+        knob2Max.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                data = progress + "\n";
+                manager.write(data.getBytes());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        builder.setView(view);
+        builder.setTitle("Nastavte maximálni hodnotu knobu 2");
+        builder.setMessage("Pomalu posunujte slidrem z leva do prava než dojedete na maximální úhel otočení vašeho knobu. Následně stiskněte ok.");
+        builder.setPositiveButton("Ok", ((dialog, which) -> {
+            ourDevice.getMax().set(1, knob2Max.getProgress());
+            ourDevice.getNames().set(1, knob2Name.getText().toString());
+            openDialogSetKnob3();
+        }));
+        builder.setNegativeButton("Skip", ((dialog, which) -> {
+            ourDevice.setKnobs(1);
+            ourDevice.isSet = true;
+            user.getOurDeviceList().set(positionInDeviceList, ourDevice);
+            setView();
+
+        }));
+        builder.setCancelable(false);
+        mDialog = builder.create();
+        mDialog.show();
+    }
+
+    private void openDialogSetKnob3() {
+        mDialog.dismiss();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_set_knob_3, null);
+
+        EditText knob3Name = view.findViewById(R.id.nameKnob3);
+        SeekBar knob3Max = view.findViewById(R.id.maxKnob3);
+
+        knob3Max.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                data = progress + "\n";
+                manager.write(data.getBytes());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        builder.setView(view);
+        builder.setTitle("Nastavte maximálni hodnotu knobu 3");
+        builder.setMessage("Pomalu posunujte slidrem z leva do prava než dojedete na maximální úhel otočení vašeho knobu. Následně stiskněte ok.");
+        builder.setPositiveButton("Ok", ((dialog, which) -> {
+            ourDevice.getMax().set(2, knob3Max.getProgress());
+            ourDevice.getNames().set(2, knob3Name.getText().toString());
+            ourDevice.setKnobs(3);
+            ourDevice.isSet = true;
+            user.getOurDeviceList().set(positionInDeviceList, ourDevice);
+            setView();
+        }));
+        builder.setNegativeButton("Skip", ((dialog, which) -> {
+            ourDevice.setKnobs(2);
+            ourDevice.isSet = true;
+            user.getOurDeviceList().set(positionInDeviceList, ourDevice);
+            setView();
+        }));
+        builder.setCancelable(false);
+        mDialog = builder.create();
+        mDialog.show();
+    }
+
+    public void saveData() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore dataBase = FirebaseFirestore.getInstance();
+        dataBase.collection("users").document(mAuth.getCurrentUser().getUid()).set(user)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "saveData: Data successfully written"))
+                .addOnFailureListener(e -> Log.w(TAG, "saveData: Error", e));
+    }
 
     @Override
     protected void onResume() {
@@ -268,22 +427,16 @@ public class BtControlActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        saveData();
         super.onPause();
     }
 
-    @Override
-    protected void onDestroy() {
-        try {
-            c.cancel();
-            manager.cancel();
-        } catch (NullPointerException e) {
-            Log.d(TAG, "onDestroy: socket is canceled");
-        }
-        super.onDestroy();
-    }
 
     @Override
     public void onBackPressed() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("user", user);
+        setResult(RESULT_OK, resultIntent);
         try {
             c.cancel();
             manager.cancel();
@@ -291,6 +444,19 @@ public class BtControlActivity extends AppCompatActivity {
             Log.d(TAG, "onDestroy: socket is canceled");
         }
         super.onBackPressed();
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        saveData();
+        try {
+            c.cancel();
+            manager.cancel();
+        } catch (NullPointerException e) {
+            Log.d(TAG, "onDestroy: socket is canceled");
+        }
+        super.onDestroy();
     }
 
     private class ConnectingToBT extends Thread {

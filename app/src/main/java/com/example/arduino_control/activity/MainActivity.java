@@ -41,11 +41,13 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getName();
     private final UUID mDeviceUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    public static final String BLUETOOTH_DEVICE = "BtDevice";
+    public static final String USER = "user";
+    public static final String POSITION = "position";
     public static final String DEVICE_UUID = "DeviceUUID";
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_ADD_DEVICE = 2;
+    private static final int REQUEST_BT_CONTROL = 3;
     private static final int CAMERA_PERMISSION_CODE = 1;
 
     private BluetoothAdapter mBluetoothAdapter;
@@ -166,11 +168,21 @@ public class MainActivity extends AppCompatActivity {
                         ourName = data.getStringExtra("name");
                         macAddress = data.getStringExtra("macAddress");
                     } catch (NullPointerException e) {
-                        Log.e("T", "Cant import btDevice from Intent.");
+                        Log.e(TAG, "Cant import btDevice from Intent.");
                     }
 
                     ourDeviceList.add(new OurDevice(macAddress, ourName));
                     mAdapter.notifyDataSetChanged();
+                }
+                break;
+            case REQUEST_BT_CONTROL:
+                if (resultCode == RESULT_OK){
+                    try {
+                        user = (User) data.getSerializableExtra("user");
+                        Log.d(TAG, "onActivityResult: new user set");
+                    } catch (NullPointerException e) {
+                        Log.e(TAG, "Cant import btDevice from Intent.");
+                    }
                 }
                 break;
         }
@@ -191,10 +203,11 @@ public class MainActivity extends AppCompatActivity {
             mAdapter.notifyDataSetChanged();
 
             Intent intent = new Intent(this, BtControlActivity.class);
-            intent.putExtra(BLUETOOTH_DEVICE, ourDeviceList.get(position));
+            intent.putExtra(USER, user);
+            intent.putExtra(POSITION, position);
             intent.putExtra(DEVICE_UUID, mDeviceUUID.toString());
             mBluetoothAdapter.cancelDiscovery();
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_BT_CONTROL);
         });
 
         mListView.setOnItemLongClickListener((parent, view, position, id) -> {
@@ -275,7 +288,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void saveData() {
-        User user = new User(ourDeviceList);
+        if(user == null) {
+            user = new User(ourDeviceList);
+        }
         dataBase.collection("users").document(currentUser.getUid()).set(user)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "saveData: Data successfully written"))
                 .addOnFailureListener(e -> Log.w(TAG, "saveData: Error", e));
