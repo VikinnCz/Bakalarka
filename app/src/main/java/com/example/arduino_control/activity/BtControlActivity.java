@@ -1,7 +1,5 @@
 package com.example.arduino_control.activity;
 
-import android.app.Activity;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
@@ -9,7 +7,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
-import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +14,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.arduino_control.OurDevice;
 import com.example.arduino_control.R;
@@ -31,7 +26,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
-import java.util.zip.Inflater;
 
 public class BtControlActivity extends AppCompatActivity {
 
@@ -43,13 +37,9 @@ public class BtControlActivity extends AppCompatActivity {
     private SeekBar controller_01;
     private SeekBar controller_02;
     private SeekBar controller_03;
-    private TextView knob1NameView;
-    private TextView knob2NameView;
-    private TextView knob3NameView;
     private Button knob2Add;
     private Button knob3Add;
     private User user;
-    private BluetoothDevice btDevice;
     private OurDevice ourDevice;
     private ConnectingToBT c;
     private ManageConnection manager;
@@ -79,11 +69,9 @@ public class BtControlActivity extends AppCompatActivity {
     }
 
     public void startConnecting() {
-        btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(user.getOurDeviceList().get(positionInDeviceList).getMacAddress());
+        BluetoothDevice btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(user.getOurDeviceList().get(positionInDeviceList).getMacAddress());
         c = new ConnectingToBT(btDevice);
-        new Thread(() -> {
-            c.run();
-        }).start();
+        new Thread(() -> c.start()).start(); // TODO: Testnou jestloi je pottřeba po změne s c.run() na c.start() stále spouštět v dalším vlkáknu dřív zaseklo main thread.
         Log.d(TAG, "startConnecting: ");
         new Thread(() -> {
             for (int i = 0; i <= 50; i++) {
@@ -126,9 +114,9 @@ public class BtControlActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_bt_control);
 
-        knob1NameView = findViewById(R.id.knob1NameView);
-        knob2NameView = findViewById(R.id.knob2NameView);
-        knob3NameView = findViewById(R.id.knob3NameView);
+        TextView knob1NameView = findViewById(R.id.knob1NameView);
+        TextView knob2NameView = findViewById(R.id.knob2NameView);
+        TextView knob3NameView = findViewById(R.id.knob3NameView);
         controller_01 = findViewById(R.id.controller_01);
         controller_02 = findViewById(R.id.controller_02);
         controller_03 = findViewById(R.id.controller_03);
@@ -486,15 +474,13 @@ public class BtControlActivity extends AppCompatActivity {
     private class ConnectingToBT extends Thread {
 
         private final BluetoothSocket mnSocket;
-        private final BluetoothDevice mnDevice;
 
         public ConnectingToBT(BluetoothDevice device) {
 
             BluetoothSocket tmp = null;
-            this.mnDevice = device;
 
             try {
-                tmp = mnDevice.createRfcommSocketToServiceRecord(mDeviceUUID);
+                tmp = device.createRfcommSocketToServiceRecord(mDeviceUUID);
             } catch (IOException e) {
                 Log.e("T", "Could not create client socket.");
             }
@@ -561,7 +547,6 @@ public class BtControlActivity extends AppCompatActivity {
 
         }
 
-
         public void write(byte[] bytes) {
             if (!sending) {
                 try {
@@ -580,10 +565,8 @@ public class BtControlActivity extends AppCompatActivity {
                     Log.e(TAG, "Could not send data to device." + data);
                     if (mmSocket.isConnected()) {
                         c.cancel();
-                        startConnecting();
-                    } else {
-                        startConnecting();
                     }
+                    startConnecting();
                 }
             }
         }
