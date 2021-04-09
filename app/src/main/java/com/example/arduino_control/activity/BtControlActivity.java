@@ -545,6 +545,7 @@ public class BtControlActivity extends AppCompatActivity {
     private class ManageConnection extends Thread {
         private final BluetoothSocket mmSocket;
         private final OutputStream mmOutputStream;
+        private boolean sending = false;
 
         public ManageConnection(BluetoothSocket socket) {
             this.mmSocket = socket;
@@ -557,21 +558,32 @@ public class BtControlActivity extends AppCompatActivity {
             }
 
             mmOutputStream = tmpOut;
+
         }
 
 
         public void write(byte[] bytes) {
-            try {
-                mmOutputStream.write(bytes);
-                Log.d(TAG, "send: " + data);
-
-            } catch (Exception e) {
-                Log.e(TAG, "Could not send data to device." + data);
-                if (mmSocket.isConnected()) {
-                    c.cancel();
-                    startConnecting();
-                } else {
-                    startConnecting();
+            if (!sending) {
+                try {
+                    sending = true;
+                    mmOutputStream.write(bytes);
+                    Log.d(TAG, "send: " + data);
+                    new Thread(() -> {
+                        try {
+                            Thread.sleep(10);
+                            sending = false;
+                        } catch (InterruptedException e) {
+                            Log.d(TAG, "write: " + e);
+                        }
+                    }).start();
+                } catch (Exception e) {
+                    Log.e(TAG, "Could not send data to device." + data);
+                    if (mmSocket.isConnected()) {
+                        c.cancel();
+                        startConnecting();
+                    } else {
+                        startConnecting();
+                    }
                 }
             }
         }
