@@ -13,6 +13,7 @@ import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -39,12 +40,14 @@ public class BtControlActivity extends AppCompatActivity {
     private static final String KNOB_2_MIN = "181\n";
     private static final String KNOB_3_MIN = "361\n";
 
-    public SeekBar controller_01;
-    public SeekBar controller_02;
-    public SeekBar controller_03;
-    public TextView knob1NameView;
-    public TextView knob2NameView;
-    public TextView knob3NameView;
+    private SeekBar controller_01;
+    private SeekBar controller_02;
+    private SeekBar controller_03;
+    private TextView knob1NameView;
+    private TextView knob2NameView;
+    private TextView knob3NameView;
+    private Button knob2Add;
+    private Button knob3Add;
     private User user;
     private BluetoothDevice btDevice;
     private OurDevice ourDevice;
@@ -129,6 +132,8 @@ public class BtControlActivity extends AppCompatActivity {
         controller_01 = findViewById(R.id.controller_01);
         controller_02 = findViewById(R.id.controller_02);
         controller_03 = findViewById(R.id.controller_03);
+        knob2Add = findViewById(R.id.addKnob2);
+        knob3Add = findViewById(R.id.addKnob3);
 
         switch (ourDevice.getKnobs()) {
             case 1:
@@ -138,6 +143,8 @@ public class BtControlActivity extends AppCompatActivity {
                 knob1NameView.setVisibility(View.VISIBLE);
                 controller_01.setVisibility(View.VISIBLE);
                 controller_01.setClickable(true);
+
+                knob2Add.setVisibility(View.VISIBLE);
 
                 break;
             case 2:
@@ -153,6 +160,8 @@ public class BtControlActivity extends AppCompatActivity {
                 knob2NameView.setVisibility(View.VISIBLE);
                 controller_02.setVisibility(View.VISIBLE);
                 controller_02.setClickable(true);
+
+                knob3Add.setVisibility(View.VISIBLE);
                 break;
             case 3:
                 knob1NameView.setText(ourDevice.getNames().get(0));
@@ -177,6 +186,21 @@ public class BtControlActivity extends AppCompatActivity {
         }
 
         sendData();
+        addKnobs();
+    }
+
+    private void addKnobs() {
+        knob2Add.setOnClickListener(v -> {
+            manager.write(KNOB_2_MIN.getBytes());
+            openDialogSetKnob2();
+
+
+        });
+
+        knob3Add.setOnClickListener(v -> {
+            manager.write(KNOB_3_MIN.getBytes());
+            openDialogSetKnob3();
+        });
     }
 
     public void sendData() {

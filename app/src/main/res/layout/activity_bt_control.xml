@@ -40,6 +40,16 @@
         app:layout_constraintBottom_toTopOf="@+id/controller_02"
         app:layout_constraintStart_toStartOf="@+id/controller_02" />
 
+    <Button
+        android:id="@+id/addKnob2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="Přidat knob"
+        app:layout_constraintBottom_toTopOf="@+id/controller_02"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <SeekBar
         android:id="@+id/controller_02"
         android:layout_width="match_parent"
@@ -64,6 +74,16 @@
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/controller_03"
         app:layout_constraintStart_toStartOf="@+id/controller_03" />
+
+    <Button
+        android:id="@+id/addKnob3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="Přidat knob"
+        app:layout_constraintBottom_toTopOf="@+id/controller_03"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <SeekBar
         android:id="@+id/controller_03"
