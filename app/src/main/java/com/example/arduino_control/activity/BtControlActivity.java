@@ -3,28 +3,43 @@ package com.example.arduino_control.activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.arduino_control.OurDevice;
+import com.example.arduino_control.Preset;
 import com.example.arduino_control.R;
 import com.example.arduino_control.User;
+import com.example.arduino_control.ui.main.ListOfPresetsAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class BtControlActivity extends AppCompatActivity {
@@ -66,6 +81,22 @@ public class BtControlActivity extends AppCompatActivity {
         openDialogConnecting();
 
         startConnecting();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_presets, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.presetsItem) {
+            openDialogPresets();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void startConnecting() {
@@ -423,6 +454,95 @@ public class BtControlActivity extends AppCompatActivity {
         builder.setCancelable(false);
         mDialog = builder.create();
         mDialog.show();
+    }
+
+    private void openDialogPresets() {
+        mDialog.dismiss();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_presets, null);
+
+        ListView listViewOfPresets = view.findViewById(R.id.nameKnob3);
+        ListOfPresetsAdapter listOfPresetsAdapter = new ListOfPresetsAdapter(this, R.layout.item_preset, ourDevice.listOfPresets);
+        listViewOfPresets.setAdapter(listOfPresetsAdapter);
+
+
+        builder.setView(view);
+        builder.setTitle("Presety");
+        builder.setPositiveButton("Uložit", ((dialog, which) -> {
+            openDialogGetPresetName();
+        }));
+        builder.setNegativeButton("Zrušit", ((dialog, which) -> {
+        }));
+        mDialog = builder.create();
+        mDialog.show();
+
+        listViewOfPresets.setOnItemClickListener((parent, view1, position, id) -> {
+            //TODO: load preset
+            Preset preset = ourDevice.listOfPresets.get(position);
+            switch (ourDevice.getKnobs()){
+                case 1:
+                    data = preset.getValue1() + "\n";
+                    manager.write(data.getBytes());
+                    controller_01.setProgress(preset.getValue1());
+                    break;
+                case 2:
+                    data = preset.getValue1() + "\n";
+                    manager.write(data.getBytes());
+                    controller_01.setProgress(preset.getValue1());
+
+                    data = preset.getValue2() + "\n";
+                    manager.write(data.getBytes());
+                    controller_01.setProgress(preset.getValue2());
+                    break;
+                case 3:
+                    data = preset.getValue1() + "\n";
+                    manager.write(data.getBytes());
+                    controller_01.setProgress(preset.getValue1());
+
+                    data = preset.getValue2() + "\n";
+                    manager.write(data.getBytes());
+                    controller_01.setProgress(preset.getValue2());
+
+                    data = preset.getValue3() + "\n";
+                    manager.write(data.getBytes());
+                    controller_01.setProgress(preset.getValue3());
+
+                    break;
+            }
+        });
+    }
+
+    public void openDialogGetPresetName() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_layout, null);
+
+        final EditText mOurName = view.findViewById(R.id.ourName);
+
+        builder.setView(view)
+                .setTitle("Rename")
+                .setNegativeButton("cancel", (dialog, which) -> {
+
+                })
+                .setPositiveButton("ok", (dialog, which) -> {
+                    switch (ourDevice.getKnobs()) {
+                        case 1:
+                            ourDevice.listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress()));
+                            break;
+                        case 2:
+                            ourDevice.listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress(), controller_02.getProgress()));
+                            break;
+                        case 3:
+                            ourDevice.listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress(), controller_02.getProgress(), controller_03.getProgress()));
+                            break;
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     public void saveData() {

@@ -1,5 +1,7 @@
 package com.example.arduino_control;
 
+import android.widget.ArrayAdapter;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -9,6 +11,7 @@ public class OurDevice implements Serializable {
     private String macAddress;
     private ArrayList<Integer> max;
     private ArrayList<String> names;
+    public ArrayList<Preset> listOfPresets;
     public boolean isSet;
     private int colorClicked;
     private int knobs;
