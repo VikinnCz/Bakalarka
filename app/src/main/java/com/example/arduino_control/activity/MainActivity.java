@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case REQUEST_BT_CONTROL:
-                if (resultCode == RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     try {
                         user = (User) data.getSerializableExtra("user");
                         Log.d(TAG, "onActivityResult: new user set");
@@ -211,14 +211,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mListView.setOnItemLongClickListener((parent, view, position, id) -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-            builder.setTitle("Delete: " + ourDeviceList.get(position).getOurName())
-                    .setNegativeButton("No", (dialog, which) -> {
+            LayoutInflater inflater = this.getLayoutInflater();
+            View v = inflater.inflate(R.layout.dialog_layout, null);
 
-                    })
-                    .setPositiveButton("Yes", (dialog, which) -> {
+            final EditText mOurName = v.findViewById(R.id.ourName);
+
+            builder.setView(v)
+                    .setTitle("Upravit")
+                    .setNegativeButton("Smazat", (dialog, which) -> {
                         ourDeviceList.remove(position);
+                        mAdapter.notifyDataSetChanged();
+                    })
+                    .setPositiveButton("ok", (dialog, which) -> {
+                        ourDeviceList.get(position).setOurName(mOurName.getText().toString());
                         mAdapter.notifyDataSetChanged();
                     });
 
@@ -227,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
+
     }
 
     private class OurDeviceListAdapter extends ArrayAdapter<OurDevice> {
@@ -266,8 +274,8 @@ public class MainActivity extends AppCompatActivity {
                 v = LayoutInflater.from(context).inflate(R.layout.item_device, parent, false);
                 holder = new OurDeviceListAdapter.ViewHolder();
 
-                holder.name = (TextView) v.findViewById(R.id.ourDeviceName);
-                holder.item = (RelativeLayout) v.findViewById(R.id.deviceItem);
+                holder.name = v.findViewById(R.id.ourDeviceName);
+                holder.item = v.findViewById(R.id.deviceItem);
                 holder.item.setBackgroundColor(getResources().getColor(R.color.cardview_light_background, getTheme()));
 
                 v.setTag(holder);
@@ -288,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void saveData() {
-        if(user == null) {
+        if (user == null) {
             user = new User(ourDeviceList);
         }
         dataBase.collection("users").document(currentUser.getUid()).set(user)

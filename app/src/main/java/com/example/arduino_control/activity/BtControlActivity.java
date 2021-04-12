@@ -71,7 +71,7 @@ public class BtControlActivity extends AppCompatActivity {
     public void startConnecting() {
         BluetoothDevice btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(user.getOurDeviceList().get(positionInDeviceList).getMacAddress());
         c = new ConnectingToBT(btDevice);
-        new Thread(() -> c.start()).start(); // TODO: Testnou jestloi je pottřeba po změne s c.run() na c.start() stále spouštět v dalším vlkáknu dřív zaseklo main thread.
+        c.start(); // TODO: Testnou jestloi je pottřeba po změne s c.run() na c.start() stále spouštět v dalším vlkáknu dřív zaseklo main thread.
         Log.d(TAG, "startConnecting: ");
         new Thread(() -> {
             for (int i = 0; i <= 50; i++) {
@@ -123,6 +123,8 @@ public class BtControlActivity extends AppCompatActivity {
         knob2Add = findViewById(R.id.addKnob2);
         knob3Add = findViewById(R.id.addKnob3);
 
+        getSupportActionBar().setTitle(ourDevice.getOurName());
+
         switch (ourDevice.getKnobs()) {
             case 1:
                 knob1NameView.setText(ourDevice.getNames().get(0));
@@ -173,7 +175,7 @@ public class BtControlActivity extends AppCompatActivity {
                 break;
         }
 
-        sendData();
+        takeData();
         addKnobs();
     }
 
@@ -191,7 +193,7 @@ public class BtControlActivity extends AppCompatActivity {
         });
     }
 
-    public void sendData() {
+    public void takeData() {
         controller_01.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -553,9 +555,9 @@ public class BtControlActivity extends AppCompatActivity {
                     sending = true;
                     mmOutputStream.write(bytes);
                     Log.d(TAG, "send: " + data);
-                    new Thread(() -> {
+                    new Thread(() -> { //TODO: Stále doje po chvíli k zahlcení řešení může být upravit kód v arduinu aby mazal buffer
                         try {
-                            Thread.sleep(10);
+                            Thread.sleep(20);
                             sending = false;
                         } catch (InterruptedException e) {
                             Log.d(TAG, "write: " + e);
