@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         user = (User) data.getSerializableExtra("user");
                         Log.d(TAG, "onActivityResult: new user set");
+                        saveData();
                     } catch (NullPointerException e) {
                         Log.e(TAG, "Cant import btDevice from Intent.");
                     }
@@ -240,7 +241,6 @@ public class MainActivity extends AppCompatActivity {
     private class OurDeviceListAdapter extends ArrayAdapter<OurDevice> {
 
         Context context;
-
         List<OurDevice> myList;
 
         public OurDeviceListAdapter(Context context, int resource, int textViewResourceId, List<OurDevice> objects) {
@@ -248,22 +248,6 @@ public class MainActivity extends AppCompatActivity {
             this.context = context;
             myList = objects;
         }
-
-        @Override
-        public int getCount() {
-            return myList.size();
-        }
-
-        @Override
-        public OurDevice getItem(int position) {
-            return myList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
 
         @NonNull
         @Override

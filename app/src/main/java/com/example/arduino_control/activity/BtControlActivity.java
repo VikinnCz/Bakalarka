@@ -3,10 +3,11 @@ package com.example.arduino_control.activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothClass;
+
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
+
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,17 +16,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.arduino_control.OurDevice;
@@ -39,8 +36,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
+import java.util.zip.Inflater;
 
 public class BtControlActivity extends AppCompatActivity {
 
@@ -58,12 +55,14 @@ public class BtControlActivity extends AppCompatActivity {
     private OurDevice ourDevice;
     private ConnectingToBT c;
     private ManageConnection manager;
+    private ListOfPresetsAdapter listOfPresetsAdapter;
     Dialog mDialog;
 
     private UUID mDeviceUUID;
 
-    String data;
+    private String data;
     public int positionInDeviceList;
+    private ArrayList<Preset> listOfPresets;
 
 
     @Override
@@ -77,6 +76,8 @@ public class BtControlActivity extends AppCompatActivity {
         positionInDeviceList = b.getInt(MainActivity.POSITION);
         mDeviceUUID = UUID.fromString(b.getString(MainActivity.DEVICE_UUID));
         ourDevice = user.getOurDeviceList().get(positionInDeviceList);
+        listOfPresets = ourDevice.getListOfPresets();
+        listOfPresetsAdapter = new ListOfPresetsAdapter(getApplicationContext(), R.layout.item_preset, listOfPresets);
 
         openDialogConnecting();
 
@@ -463,8 +464,7 @@ public class BtControlActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_presets, null);
 
-        ListView listViewOfPresets = view.findViewById(R.id.nameKnob3);
-        ListOfPresetsAdapter listOfPresetsAdapter = new ListOfPresetsAdapter(this, R.layout.item_preset, ourDevice.listOfPresets);
+        ListView listViewOfPresets = view.findViewById(R.id.listViewPresets);
         listViewOfPresets.setAdapter(listOfPresetsAdapter);
 
 
@@ -481,7 +481,7 @@ public class BtControlActivity extends AppCompatActivity {
         listViewOfPresets.setOnItemClickListener((parent, view1, position, id) -> {
             //TODO: load preset
             Preset preset = ourDevice.listOfPresets.get(position);
-            switch (ourDevice.getKnobs()){
+            switch (ourDevice.getKnobs()) {
                 case 1:
                     data = preset.getValue1() + "\n";
                     manager.write(data.getBytes());
@@ -512,6 +512,11 @@ public class BtControlActivity extends AppCompatActivity {
                     break;
             }
         });
+
+        listViewOfPresets.setOnItemLongClickListener((parent, view12, position, id) -> {
+            openDialogChangePreset(position);
+            return true;
+        });
     }
 
     public void openDialogGetPresetName() {
@@ -520,7 +525,7 @@ public class BtControlActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_layout, null);
 
-        final EditText mOurName = view.findViewById(R.id.ourName);
+        EditText mOurName = view.findViewById(R.id.ourName);
 
         builder.setView(view)
                 .setTitle("Rename")
@@ -530,16 +535,41 @@ public class BtControlActivity extends AppCompatActivity {
                 .setPositiveButton("ok", (dialog, which) -> {
                     switch (ourDevice.getKnobs()) {
                         case 1:
-                            ourDevice.listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress()));
+                            listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress()));
+                            listOfPresetsAdapter.notifyDataSetChanged();
                             break;
                         case 2:
-                            ourDevice.listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress(), controller_02.getProgress()));
+                            listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress(), controller_02.getProgress()));
+                            listOfPresetsAdapter.notifyDataSetChanged();
                             break;
                         case 3:
-                            ourDevice.listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress(), controller_02.getProgress(), controller_03.getProgress()));
+                            listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress(), controller_02.getProgress(), controller_03.getProgress()));
+                            listOfPresetsAdapter.notifyDataSetChanged();
                             break;
                     }
                 });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void openDialogChangePreset(int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = getLayoutInflater();
+        View v = inflater.inflate(R.layout.dialog_layout, null);
+
+        EditText getName = v.findViewById(R.id.ourName);
+
+        builder.setView(v);
+        builder.setPositiveButton("Přejmenovat", (dialog, which) -> {
+            listOfPresets.get(position).setName(getName.getText().toString());
+            listOfPresetsAdapter.notifyDataSetChanged();
+        });
+        builder.setNegativeButton("Smazat", (dialog, which) -> {
+            listOfPresets.remove(position);
+            listOfPresetsAdapter.notifyDataSetChanged();
+        });
 
         AlertDialog dialog = builder.create();
         dialog.show();

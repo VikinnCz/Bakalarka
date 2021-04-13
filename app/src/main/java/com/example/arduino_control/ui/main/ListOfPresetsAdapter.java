@@ -13,14 +13,15 @@ import androidx.annotation.Nullable;
 import com.example.arduino_control.Preset;
 import com.example.arduino_control.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ListOfPresetsAdapter extends ArrayAdapter<Preset> {
     Context context;
-    List<Preset> listOfPresets;
+    ArrayList<Preset> listOfPresets;
 
-    public ListOfPresetsAdapter(@NonNull Context context, int resource, List<Preset> listOfPresets) {
-        super(context, resource);
+    public ListOfPresetsAdapter(@NonNull Context context, int resource, ArrayList<Preset> listOfPresets) {
+        super(context, resource, listOfPresets);
         this.context = context;
         this.listOfPresets = listOfPresets;
     }
@@ -30,19 +31,19 @@ public class ListOfPresetsAdapter extends ArrayAdapter<Preset> {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         View v = convertView;
         ListOfPresetsAdapter.ViewHolder holder;
-        if (convertView == null){
-            v = LayoutInflater.from(context).inflate(R.layout.item_preset, parent);
-            holder = new ViewHolder();
 
-            holder.name = v.findViewById(R.id.nameOfPreset);
+        if (convertView == null){
+            v = LayoutInflater.from(context).inflate(R.layout.item_preset, parent, false);
+            holder = new ListOfPresetsAdapter.ViewHolder();
+
+            holder.name = (TextView) v.findViewById(R.id.nameOfPreset);
 
             v.setTag(holder);
         } else {
             holder = (ListOfPresetsAdapter.ViewHolder) v.getTag();
         }
         holder.name.setText(listOfPresets.get(position).getName());
-
-        return super.getView(position, convertView, parent);
+        return v;
     }
 
     private static class ViewHolder{

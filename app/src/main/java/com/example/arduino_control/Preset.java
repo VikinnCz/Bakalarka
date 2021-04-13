@@ -1,8 +1,12 @@
 package com.example.arduino_control;
 
-public class Preset {
+import java.io.Serializable;
+
+public class Preset implements Serializable {
     String name;
     int value1, value2, value3;
+
+    public Preset(){}
 
     public Preset(String name, int value1){
         this.name = name;
@@ -20,6 +24,10 @@ public class Preset {
         this.value1 = value1;
         this.value2 = value2;
         this.value3 = value3;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getName() {

@@ -29,6 +29,7 @@ public class OurDevice implements Serializable {
         names.add("knob 1");
         names.add("knob 2");
         names.add("knob 3");
+        listOfPresets = new ArrayList<>();
     }
 
     public OurDevice(){
@@ -73,5 +74,9 @@ public class OurDevice implements Serializable {
 
     public int getKnobs(){
         return knobs;
+    }
+
+    public ArrayList<Preset> getListOfPresets() {
+        return listOfPresets;
     }
 }
