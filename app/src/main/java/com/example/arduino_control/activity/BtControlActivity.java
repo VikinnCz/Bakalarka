@@ -293,12 +293,12 @@ public class BtControlActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Nejprve je potřeba vše nastavit");
         builder.setMessage("Sundejte zařízení s efektu a okotče knoby na minimul do leva. Následně stiskněte ok.");
-        builder.setPositiveButton("Ok", ((dialog, which) -> {
-            manager.write(KNOB_1_MIN.getBytes());
-            manager.write(KNOB_2_MIN.getBytes());
-            manager.write(KNOB_3_MIN.getBytes());
+        builder.setPositiveButton("Ok", (dialog, which) -> {
+            manager.writeAbsolutely(KNOB_1_MIN.getBytes());
+            manager.writeAbsolutely(KNOB_2_MIN.getBytes());
+            manager.writeAbsolutely(KNOB_3_MIN.getBytes());
             openDialogPutDevice();
-        }));
+        });
         builder.setCancelable(false);
         mDialog = builder.create();
         mDialog.show();
@@ -469,7 +469,8 @@ public class BtControlActivity extends AppCompatActivity {
         builder.setView(view);
         builder.setTitle("Presety");
         builder.setPositiveButton("Přidat", (dialog, which) -> openDialogGetPresetName()); // save preset
-        builder.setNegativeButton("Odejít", (dialog, which) -> {});
+        builder.setNegativeButton("Odejít", (dialog, which) -> {
+        });
         mDialog = builder.create();
         mDialog.show();
 
@@ -479,30 +480,29 @@ public class BtControlActivity extends AppCompatActivity {
             switch (ourDevice.getKnobs()) {
                 case 1:
                     data = preset.getValue1() + "\n";
-                    manager.write(data.getBytes());
+                    manager.writeAbsolutely(data.getBytes());
                     controller_01.setProgress(preset.getValue1());
                     break;
                 case 2:
-                    //TODO: Nestíhá poslat druhou hodnotu
                     data = preset.getValue1() + "\n";
-                    manager.write(data.getBytes());
+                    manager.writeAbsolutely(data.getBytes());
                     controller_01.setProgress(preset.getValue1());
 
                     data = preset.getValue2() + "\n";
-                    manager.write(data.getBytes());
+                    manager.writeAbsolutely(data.getBytes());
                     controller_02.setProgress(preset.getValue2());
                     break;
                 case 3:
                     data = preset.getValue1() + "\n";
-                    manager.write(data.getBytes());
+                    manager.writeAbsolutely(data.getBytes());
                     controller_01.setProgress(preset.getValue1());
 
                     data = preset.getValue2() + "\n";
-                    manager.write(data.getBytes());
+                    manager.writeAbsolutely(data.getBytes());
                     controller_02.setProgress(preset.getValue2());
 
                     data = preset.getValue3() + "\n";
-                    manager.write(data.getBytes());
+                    manager.writeAbsolutely(data.getBytes());
                     controller_03.setProgress(preset.getValue3());
 
                     break;
@@ -715,6 +715,21 @@ public class BtControlActivity extends AppCompatActivity {
                     }
                     startConnecting();
                 }
+            }
+        }
+
+        public void writeAbsolutely(byte[] bytes) {
+            try {
+                mmOutputStream.write(bytes);
+                Log.d(TAG, "sendAbsolutely: " + data);
+                sending = false;
+
+            } catch (Exception e) {
+                Log.e(TAG, "Could not send data to device." + data);
+                if (mmSocket.isConnected()) {
+                    c.cancel();
+                }
+                startConnecting();
             }
         }
 
