@@ -37,6 +37,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Activity where user can start AddDeviceActivity for search a add bluetooth devices. A then user can connect to this bluetooth devices.
+ * @author Vikinn
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getName();
@@ -54,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     private User user;
     private ArrayList<OurDevice> ourDeviceList = new ArrayList<>();
     private OurDeviceListAdapter mAdapter;
-    private ListView mListView;
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
@@ -72,12 +75,15 @@ public class MainActivity extends AppCompatActivity {
 
 
         isBluetoothEnable();
-        getUser();
+        currentUser = getUser();
         loadData();
         getPermission();
     }
 
-    public void getPermission() {
+    /**
+     * Check if application haw guaranteed permission for CAMERA. If application don`t have permission function call dialog for take permission from user.
+     */
+    private void getPermission() {
         if (this.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (this.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this)
@@ -101,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // If permission are not guaranteed call again getPermission().
         if (requestCode == CAMERA_PERMISSION_CODE) {
             if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 getPermission();
@@ -108,12 +116,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getUser() {
+    /**
+     * FirebaseUser from LogInActivity.
+     * @return Firebase user who is logged in the application.
+     */
+    private FirebaseUser getUser() {
         Intent intent = getIntent();
         Bundle b = intent.getExtras();
-        currentUser = b.getParcelable("user");
+        return b.getParcelable("user");
     }
 
+    /**
+     * Check if Bluetooth is enable on this device. If isn`t so turn it on.
+     */
     public void isBluetoothEnable() {
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -136,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.add01) {
-            Intent intent1 = new Intent(getApplicationContext(), AddDeviceActivity.class);
+            Intent intent1 = new Intent(this, AddDeviceActivity.class);
             startActivityForResult(intent1, REQUEST_ADD_DEVICE);
         } else if (id == R.id.logOut) {
             mAuth.signOut();
@@ -152,14 +167,12 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_ENABLE_BT:
-
                 if (resultCode == RESULT_OK) {
                     Toast.makeText(this, "Bluetooth on", Toast.LENGTH_SHORT).show();
                 }
                 break;
-
+            // Get parameters of new bluetooth device and put it to aurDeviceList
             case REQUEST_ADD_DEVICE:
-
                 if (resultCode == RESULT_OK) {
                     String macAddress = null;
                     String ourName = null;
@@ -175,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
                     mAdapter.notifyDataSetChanged();
                 }
                 break;
+            // Take back modified user from BTControlActivity.
             case REQUEST_BT_CONTROL:
                 if (resultCode == RESULT_OK) {
                     try {
@@ -189,13 +203,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Build and show list of Users Bluetooth devices which they have to control.
+     */
     protected void buildOurDeviceListView() {
 
-        mListView = findViewById(R.id.ourDeviceList);
+        ListView mListView = findViewById(R.id.ourDeviceList);
 
         mAdapter = new OurDeviceListAdapter(getApplicationContext(), R.layout.item_device, R.id.BtName, ourDeviceList);
         mListView.setAdapter(mAdapter);
 
+        // On item click try connect to the selected bluetooth device.
         mListView.setOnItemClickListener((parent, view, position, id) -> {
             for (int i = 0; i < ourDeviceList.size(); i++) {
                 ourDeviceList.get(i).setColorClicked(getResources().getColor(R.color.cardview_light_background, getTheme()));
@@ -211,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, REQUEST_BT_CONTROL);
         });
 
+        // On item long click show dialog for rename or delete bluetooth device.
         mListView.setOnItemLongClickListener((parent, view, position, id) -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -232,10 +251,8 @@ public class MainActivity extends AppCompatActivity {
 
             AlertDialog dialog = builder.create();
             dialog.show();
-
             return true;
         });
-
     }
 
     private class OurDeviceListAdapter extends ArrayAdapter<OurDevice> {
@@ -279,6 +296,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Save user data to Firebase cloud.
+     */
     public void saveData() {
         if (user == null) {
             user = new User(ourDeviceList);
@@ -288,6 +308,9 @@ public class MainActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.w(TAG, "saveData: Error", e));
     }
 
+    /**
+     * Load user data from Firebase cloud.
+     */
     private void loadData() {
 
         dataBase.collection("users").document(currentUser.getUid()).get().addOnSuccessListener(documentSnapshot -> {

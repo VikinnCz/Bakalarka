@@ -20,22 +20,15 @@ import com.example.arduino_control.R;
 import com.example.arduino_control.ui.main.AddDevicePagerAdapter;
 import com.google.android.material.tabs.TabLayout;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-
+/**
+ * This activity have two fragments one BtScanFragment which show all bluetooth paired devices and BtControlActivity where user can scan bluetooth macAddress by QR code.
+ * @author Vikinn
+ */
 public class AddDeviceActivity extends AppCompatActivity {
 
     BluetoothAdapter mBluetoothAdapter;
-    Set<BluetoothDevice> pairedDevices;
-    List<BluetoothDevice> pairedDeviceList = new ArrayList<>();
-    BluetoothDevice mDevice;
-
-    private ViewPager viewPager;
-    private TabLayout tabs;
-
-    public String ourName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,16 +36,22 @@ public class AddDeviceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_device);
 
         AddDevicePagerAdapter sectionsPagerAdapter = new AddDevicePagerAdapter(this, getSupportFragmentManager());
-        viewPager = findViewById(R.id.view_pager);
+        ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
 
-        tabs = findViewById(R.id.tabs);
+        TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mBluetoothAdapter.startDiscovery();
 
     }
+
+    /**
+     * This function send attributes of new bluetooth device to MainActivity.
+     * @param mDevice is selected new bluetooth device.
+     * @param ourName is selected name of new bluetooth device.
+     */
     public void cancelActivityWithResult(BluetoothDevice mDevice, String ourName){
 
         Intent resultIntent = new Intent();
@@ -96,8 +95,8 @@ public class AddDeviceActivity extends AppCompatActivity {
             View v = convertView;
             AddDeviceActivity.PairedDeviceAdapter.ViewHolder holder;
             if (convertView == null) {
-                v = LayoutInflater.from(context).inflate(R.layout.item_list, null);
-                holder = new AddDeviceActivity.PairedDeviceAdapter.ViewHolder();
+                v = LayoutInflater.from(context).inflate(R.layout.item_list, parent);
+                holder = new ViewHolder();
 
                 holder.name = (TextView) v.findViewById(R.id.BtName);
 
@@ -107,12 +106,13 @@ public class AddDeviceActivity extends AppCompatActivity {
             }
 
             BluetoothDevice device = myList.get(position);
-            holder.name.setText(device.getName() + "\n " + device.getAddress());
+            String deviceDescription = device.getName() + "\n " + device.getAddress();
+            holder.name.setText(deviceDescription);
 
             return v;
         }
 
-        private class ViewHolder{
+        private static class ViewHolder{
             TextView name;
         }
     }

@@ -3,12 +3,7 @@ package com.example.arduino_control.fragment;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,7 +15,6 @@ import android.widget.ListView;
 
 import androidx.fragment.app.Fragment;
 
-
 import com.example.arduino_control.R;
 import com.example.arduino_control.activity.AddDeviceActivity;
 
@@ -28,6 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Fragment which search all paired bluetooth device and show to user for select ona.
+ * @author Vikinn
+ */
 public class BtScanFragment extends Fragment {
 
     BluetoothAdapter mBluetoothAdapter;
@@ -38,19 +36,6 @@ public class BtScanFragment extends Fragment {
     private ListView mListView;
 
     public String ourName;
-
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Discovery has found a device. Get the BluetoothDevice
-                // object and its info from the Intent.
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-            }
-        }
-    };
 
     public BtScanFragment() {
         // Required empty public constructor
@@ -90,15 +75,17 @@ public class BtScanFragment extends Fragment {
         mListView.setOnItemClickListener((parent, view, position, id) -> {
             mDevice = (BluetoothDevice) (mListView.getAdapter()).getItem(position);
             try {
-                openDialog();
+                openDialogSetDeviceName();
             } catch (Exception e) {
                 Log.e("T", "Dialog can not open.");
             }
         });
     }
 
-    protected void openDialog(){
-
+    /**
+     * Show dialog for write name for selected device a then cancel activity.
+     */
+    protected void openDialogSetDeviceName(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
         LayoutInflater inflater = this.getLayoutInflater();
@@ -108,9 +95,7 @@ public class BtScanFragment extends Fragment {
 
         builder.setView(view)
                 .setTitle("Rename")
-                .setNegativeButton("cancel", (dialog, which) -> {
-
-                })
+                .setNegativeButton("cancel", (dialog, which) -> {})
                 .setPositiveButton("ok", (dialog, which) -> {
                     ourName = mOurName.getText().toString();
                     cancel();
@@ -120,6 +105,9 @@ public class BtScanFragment extends Fragment {
         dialog.show();
     }
 
+    /**
+     * Call function cancelActivityWithResult from AddDevice Activity which send selected device with name to MainActivity.
+     */
     public void cancel(){
         ((AddDeviceActivity)this.getActivity()).cancelActivityWithResult(mDevice,ourName);
     }

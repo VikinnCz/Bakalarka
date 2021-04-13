@@ -15,6 +15,11 @@ import com.example.arduino_control.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Activity for authorize user. They can log in there, change password or create new account. Activity work with FirebaseAuthentication.
+ * @see com.google.firebase.auth.FirebaseAuth
+ * @author Vikinn
+ */
 public class LogInActivity extends AppCompatActivity {
 
     private static final String TAG = LogInActivity.class.getName();
@@ -39,6 +44,9 @@ public class LogInActivity extends AppCompatActivity {
         logIn();
     }
 
+    /**
+     * Check if user write email a password and tray him log in.
+     */
     private void logIn() {
         buttonLogIn.setOnClickListener(v -> {
             if (editTextEmail.getText().toString().equals("")) {
@@ -60,6 +68,10 @@ public class LogInActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Create new user account in Firebase authentication.
+     * @param v View from function was call
+     */
     public void signUp(View v) {
         if (editTextEmail.getText().toString().equals("")) {
             Toast.makeText(this, "Can not Sign-up without email", Toast.LENGTH_SHORT).show();
@@ -79,8 +91,12 @@ public class LogInActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Send link to user email for change password in Firebase authentication.
+     * @param v View from function was call
+     */
     public void changePassword(View v) {
-        if(!editTextEmail.getText().toString().equals("")){
+        if (!editTextEmail.getText().toString().equals("")) {
             mAuth.sendPasswordResetEmail(editTextEmail.getText().toString()).addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
                     Log.d(TAG, "changePassword: Email sent");
@@ -92,6 +108,9 @@ public class LogInActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * @param currentUser Logged in Firebase user
+     */
     private void startMainActivity(FirebaseUser currentUser) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("user", currentUser);

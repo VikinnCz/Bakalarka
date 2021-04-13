@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.DialogInterface;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -21,6 +20,11 @@ import com.budiyev.android.codescanner.CodeScannerView;
 import com.example.arduino_control.R;
 import com.example.arduino_control.activity.AddDeviceActivity;
 
+/**
+ * Fragment for add bluetooth device by scan QR code with bluetooth MAC address. This Fragment use library code-scanner. Require CAMERA permission.
+ * @see com.budiyev.android.codescanner.CodeScanner
+ * @author Vikinn
+ */
 public class QrScanFragment extends Fragment {
 
     private CodeScanner mCodeScanner;
@@ -48,13 +52,16 @@ public class QrScanFragment extends Fragment {
         return v;
     }
 
+    /**
+     * Operate with scanView and read QR code to String.
+     */
     private void scanner() {
         mCodeScanner = new CodeScanner(activity, scannerView);
         mCodeScanner.setDecodeCallback(result -> activity.runOnUiThread(() -> {
             if(BluetoothAdapter.checkBluetoothAddress(result.getText())){
                 mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(result.getText());
                 try {
-                    openDialog();
+                    openDialogSerDeviceName();
                 } catch (Exception e) {
                     Log.e("T", "Dialog can not open.");
                 }
@@ -65,8 +72,10 @@ public class QrScanFragment extends Fragment {
         scannerView.setOnClickListener(view -> mCodeScanner.startPreview());
     }
 
-    protected void openDialog(){
-
+    /**
+     * Show dialog for write name for selected device a then cancel activity.
+     */
+    protected void openDialogSerDeviceName(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
         LayoutInflater inflater = this.getLayoutInflater();
@@ -76,23 +85,19 @@ public class QrScanFragment extends Fragment {
 
         builder.setView(view)
                 .setTitle("Rename")
-                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                })
-                .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ourName = mOurName.getText().toString();
-                        cancel();
-                    }
+                .setNegativeButton("cancel", (dialog, which) -> {})
+                .setPositiveButton("ok", (dialog, which) -> {
+                    ourName = mOurName.getText().toString();
+                    cancel();
                 });
 
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+
+    /**
+     * Call function cancelActivityWithResult from AddDevice Activity which send selected device with name to MainActivity.
+     */
     public void cancel(){
         ((AddDeviceActivity)this.getActivity()).cancelActivityWithResult(mDevice,ourName);
     }
