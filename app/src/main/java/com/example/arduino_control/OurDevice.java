@@ -1,7 +1,5 @@
 package com.example.arduino_control;
 
-import android.widget.ArrayAdapter;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -32,9 +30,7 @@ public class OurDevice implements Serializable {
         listOfPresets = new ArrayList<>();
     }
 
-    public OurDevice(){
-
-    }
+    public OurDevice(){}
 
     public void setOurName(String ourName) {
         this.ourName = ourName;

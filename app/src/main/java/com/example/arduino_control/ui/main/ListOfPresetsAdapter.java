@@ -14,7 +14,6 @@ import com.example.arduino_control.Preset;
 import com.example.arduino_control.R;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ListOfPresetsAdapter extends ArrayAdapter<Preset> {
     Context context;
@@ -36,7 +35,7 @@ public class ListOfPresetsAdapter extends ArrayAdapter<Preset> {
             v = LayoutInflater.from(context).inflate(R.layout.item_preset, parent, false);
             holder = new ListOfPresetsAdapter.ViewHolder();
 
-            holder.name = (TextView) v.findViewById(R.id.nameOfPreset);
+            holder.name = v.findViewById(R.id.nameOfPreset);
 
             v.setTag(holder);
         } else {
