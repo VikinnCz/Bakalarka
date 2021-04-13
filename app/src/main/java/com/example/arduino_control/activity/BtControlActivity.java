@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -36,8 +34,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.zip.Inflater;
 
 public class BtControlActivity extends AppCompatActivity {
 
@@ -155,7 +153,7 @@ public class BtControlActivity extends AppCompatActivity {
         knob2Add = findViewById(R.id.addKnob2);
         knob3Add = findViewById(R.id.addKnob3);
 
-        getSupportActionBar().setTitle(ourDevice.getOurName());
+        Objects.requireNonNull(getSupportActionBar()).setTitle(ourDevice.getOurName());
 
         switch (ourDevice.getKnobs()) {
             case 1:
@@ -470,11 +468,8 @@ public class BtControlActivity extends AppCompatActivity {
 
         builder.setView(view);
         builder.setTitle("Presety");
-        builder.setPositiveButton("Uložit", ((dialog, which) -> {
-            openDialogGetPresetName();
-        }));
-        builder.setNegativeButton("Zrušit", ((dialog, which) -> {
-        }));
+        builder.setPositiveButton("Přidat", (dialog, which) -> openDialogGetPresetName());
+        builder.setNegativeButton("Odejít", (dialog, which) -> {});
         mDialog = builder.create();
         mDialog.show();
 
@@ -578,7 +573,7 @@ public class BtControlActivity extends AppCompatActivity {
     public void saveData() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseFirestore dataBase = FirebaseFirestore.getInstance();
-        dataBase.collection("users").document(mAuth.getCurrentUser().getUid()).set(user)
+        dataBase.collection("users").document(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()).set(user)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "saveData: Data successfully written"))
                 .addOnFailureListener(e -> Log.w(TAG, "saveData: Error", e));
     }
@@ -595,7 +590,6 @@ public class BtControlActivity extends AppCompatActivity {
         super.onPause();
     }
 
-
     @Override
     public void onBackPressed() {
         Intent resultIntent = new Intent();
@@ -609,7 +603,6 @@ public class BtControlActivity extends AppCompatActivity {
         }
         super.onBackPressed();
     }
-
 
     @Override
     protected void onDestroy() {
