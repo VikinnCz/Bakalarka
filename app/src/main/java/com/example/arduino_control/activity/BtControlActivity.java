@@ -468,13 +468,13 @@ public class BtControlActivity extends AppCompatActivity {
 
         builder.setView(view);
         builder.setTitle("Presety");
-        builder.setPositiveButton("Přidat", (dialog, which) -> openDialogGetPresetName());
+        builder.setPositiveButton("Přidat", (dialog, which) -> openDialogGetPresetName()); // save preset
         builder.setNegativeButton("Odejít", (dialog, which) -> {});
         mDialog = builder.create();
         mDialog.show();
 
         listViewOfPresets.setOnItemClickListener((parent, view1, position, id) -> {
-            //TODO: load preset
+            // load preset
             Preset preset = ourDevice.listOfPresets.get(position);
             switch (ourDevice.getKnobs()) {
                 case 1:
@@ -483,13 +483,14 @@ public class BtControlActivity extends AppCompatActivity {
                     controller_01.setProgress(preset.getValue1());
                     break;
                 case 2:
+                    //TODO: Nestíhá poslat druhou hodnotu
                     data = preset.getValue1() + "\n";
                     manager.write(data.getBytes());
                     controller_01.setProgress(preset.getValue1());
 
                     data = preset.getValue2() + "\n";
                     manager.write(data.getBytes());
-                    controller_01.setProgress(preset.getValue2());
+                    controller_02.setProgress(preset.getValue2());
                     break;
                 case 3:
                     data = preset.getValue1() + "\n";
@@ -498,11 +499,11 @@ public class BtControlActivity extends AppCompatActivity {
 
                     data = preset.getValue2() + "\n";
                     manager.write(data.getBytes());
-                    controller_01.setProgress(preset.getValue2());
+                    controller_02.setProgress(preset.getValue2());
 
                     data = preset.getValue3() + "\n";
                     manager.write(data.getBytes());
-                    controller_01.setProgress(preset.getValue3());
+                    controller_03.setProgress(preset.getValue3());
 
                     break;
             }
@@ -528,6 +529,7 @@ public class BtControlActivity extends AppCompatActivity {
 
                 })
                 .setPositiveButton("ok", (dialog, which) -> {
+                    // sae preset
                     switch (ourDevice.getKnobs()) {
                         case 1:
                             listOfPresets.add(new Preset(mOurName.getText().toString(), controller_01.getProgress()));
