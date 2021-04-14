@@ -56,6 +56,10 @@ public class OurDevice implements Serializable {
         this.knobs = knobs;
     }
 
+    public void setNames(ArrayList<String> names){
+        this.names = names;
+    }
+
     public String getOurName() {
         return ourName;
     }

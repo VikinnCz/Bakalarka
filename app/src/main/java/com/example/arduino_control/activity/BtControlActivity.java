@@ -47,6 +47,9 @@ public class BtControlActivity extends AppCompatActivity {
     private SeekBar controller_01;
     private SeekBar controller_02;
     private SeekBar controller_03;
+    private TextView knob1NameView;
+    private TextView knob2NameView;
+    private TextView knob3NameView;
     private Button knob2Add;
     private Button knob3Add;
     private User user;
@@ -101,7 +104,7 @@ public class BtControlActivity extends AppCompatActivity {
     public void startConnecting() {
         BluetoothDevice btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(user.getOurDeviceList().get(positionInDeviceList).getMacAddress());
         c = new ConnectingToBT(btDevice);
-        c.start(); // TODO: Testnou jestloi je pottřeba po změne s c.run() na c.start() stále spouštět v dalším vlkáknu dřív zaseklo main thread.
+        c.start();
         Log.d(TAG, "startConnecting: ");
         new Thread(() -> {
             for (int i = 0; i <= 50; i++) {
@@ -144,9 +147,9 @@ public class BtControlActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_bt_control);
 
-        TextView knob1NameView = findViewById(R.id.knob1NameView);
-        TextView knob2NameView = findViewById(R.id.knob2NameView);
-        TextView knob3NameView = findViewById(R.id.knob3NameView);
+        knob1NameView = findViewById(R.id.knob1NameView);
+        knob2NameView = findViewById(R.id.knob2NameView);
+        knob3NameView = findViewById(R.id.knob3NameView);
         controller_01 = findViewById(R.id.controller_01);
         controller_02 = findViewById(R.id.controller_02);
         controller_03 = findViewById(R.id.controller_03);
@@ -207,6 +210,24 @@ public class BtControlActivity extends AppCompatActivity {
 
         takeData();
         addKnobs();
+        renameKnobs();
+    }
+
+    private void renameKnobs(){
+        knob1NameView.setOnLongClickListener(v -> {
+            openDialogSetKnob(0);
+            return true;
+        });
+
+        knob2NameView.setOnLongClickListener(v -> {
+            openDialogSetKnob(1);
+            return true;
+        });
+
+        knob3NameView.setOnLongClickListener(v -> {
+            openDialogSetKnob(2);
+            return true;
+        });
     }
 
     private void addKnobs() {
@@ -567,6 +588,37 @@ public class BtControlActivity extends AppCompatActivity {
             listOfPresets.remove(position);
             listOfPresetsAdapter.notifyDataSetChanged();
         });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void openDialogSetKnob(int knob){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View v = inflater.inflate(R.layout.dialog_layout, null);
+
+        final EditText mOurName = v.findViewById(R.id.ourName);
+
+        builder.setView(v)
+                .setTitle("Upravit")
+                .setNegativeButton("Zavřít", (dialog, which) -> {})
+                .setPositiveButton("ok", (dialog, which) -> {
+                    String newName = mOurName.getText().toString();
+                    user.getOurDeviceList().get(positionInDeviceList).getNames().set(knob, newName);
+                    switch (knob){
+                        case 0:
+                            knob1NameView.setText(newName);
+                            break;
+                        case 1:
+                            knob2NameView.setText(newName);
+                            break;
+                        case 2:
+                            knob3NameView.setText(newName);
+                            break;
+                    }
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();

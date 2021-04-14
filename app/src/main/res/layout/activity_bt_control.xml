@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:visibility="invisible"
+        android:longClickable="true"
         app:layout_constraintBottom_toTopOf="@+id/controller_01"
         app:layout_constraintStart_toStartOf="@+id/controller_01" />
 
@@ -37,6 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:visibility="invisible"
+        android:longClickable="true"
         app:layout_constraintBottom_toTopOf="@+id/controller_02"
         app:layout_constraintStart_toStartOf="@+id/controller_02" />
 
@@ -72,6 +74,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:visibility="invisible"
+        android:longClickable="true"
         app:layout_constraintBottom_toTopOf="@+id/controller_03"
         app:layout_constraintStart_toStartOf="@+id/controller_03" />
 

@@ -27,6 +27,7 @@ public class User implements Serializable {
     public User(ArrayList<OurDevice> ourDeviceList){
         this.ourDeviceList = ourDeviceList;
     }
+
     public void setOurDeviceList(ArrayList<OurDevice> ourDeviceList){
         this.ourDeviceList = ourDeviceList;
     }

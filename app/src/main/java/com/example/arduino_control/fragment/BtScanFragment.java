@@ -133,7 +133,7 @@ public class BtScanFragment extends Fragment {
             View v = convertView;
             PairedDeviceAdapter.ViewHolder holder;
             if (convertView == null) {
-                v = LayoutInflater.from(context).inflate(R.layout.item_list, parent);
+                v = LayoutInflater.from(context).inflate(R.layout.item_list, null);
                 holder = new PairedDeviceAdapter.ViewHolder();
 
                 holder.name = v.findViewById(R.id.BtName);
