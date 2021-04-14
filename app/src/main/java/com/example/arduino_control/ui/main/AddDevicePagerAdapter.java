@@ -14,11 +14,12 @@ import com.example.arduino_control.fragment.QrScanFragment;
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
+ * @author Vikinn
  */
 public class AddDevicePagerAdapter extends FragmentPagerAdapter {
 
     public AddDevicePagerAdapter(Context context, FragmentManager fm) {
-        super(fm);
+        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
     }
 
     @Override
@@ -33,7 +34,6 @@ public class AddDevicePagerAdapter extends FragmentPagerAdapter {
                     fragment = new QrScanFragment();
                     break;
             }
-            assert fragment !=null;
             return fragment;
     }
 

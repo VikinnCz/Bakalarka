@@ -62,61 +62,6 @@ public class AddDeviceActivity extends AppCompatActivity {
         finish();
     }
 
-    public static class PairedDeviceAdapter extends ArrayAdapter<BluetoothDevice> {
-
-        Context context;
-        List<BluetoothDevice> myList;
-
-        public PairedDeviceAdapter(Context context, int resource, int textViewResourceId, List<BluetoothDevice> objects) {
-            super(context, resource, textViewResourceId, objects);
-            this.context = context;
-            myList = objects;
-        }
-
-        @Override
-        public int getCount() {
-            return myList.size();
-        }
-
-        @Override
-        public BluetoothDevice getItem(int position) {
-            return myList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            View v = convertView;
-            AddDeviceActivity.PairedDeviceAdapter.ViewHolder holder;
-            if (convertView == null) {
-                v = LayoutInflater.from(context).inflate(R.layout.item_list, parent);
-                holder = new ViewHolder();
-
-                holder.name = (TextView) v.findViewById(R.id.BtName);
-
-                v.setTag(holder);
-            } else {
-                holder = (AddDeviceActivity.PairedDeviceAdapter.ViewHolder) v.getTag();
-            }
-
-            BluetoothDevice device = myList.get(position);
-            String deviceDescription = device.getName() + "\n " + device.getAddress();
-            holder.name.setText(deviceDescription);
-
-            return v;
-        }
-
-        private static class ViewHolder{
-            TextView name;
-        }
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

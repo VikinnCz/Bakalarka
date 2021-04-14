@@ -15,6 +15,10 @@ import com.example.arduino_control.R;
 
 import java.util.ArrayList;
 
+/**
+ * A [ArrayAdapter] that return view of Presets list.
+ * @author Vikinn
+ */
 public class ListOfPresetsAdapter extends ArrayAdapter<Preset> {
     Context context;
     ArrayList<Preset> listOfPresets;

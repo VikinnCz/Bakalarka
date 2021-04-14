@@ -3,6 +3,10 @@ package com.example.arduino_control;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Class for User bluetooth device where is all information about device and list of Presets for device.
+ * @author Vikinn
+ */
 public class OurDevice implements Serializable {
 
     private String ourName;
@@ -14,7 +18,11 @@ public class OurDevice implements Serializable {
     private int colorClicked;
     private int knobs;
 
-
+    /**
+     * OurDevice constructor
+     * @param macAddress Bluetooth MAC address of device
+     * @param ourName Selected name of device.
+     */
     public OurDevice(String macAddress, String ourName){
         this.ourName = ourName;
         this.macAddress = macAddress;
@@ -30,14 +38,14 @@ public class OurDevice implements Serializable {
         listOfPresets = new ArrayList<>();
     }
 
+    /**
+     * Empty constructor due to Serializable object
+     * @see Serializable
+     */
     public OurDevice(){}
 
     public void setOurName(String ourName) {
         this.ourName = ourName;
-    }
-
-    public void setMacAddress(String macAddress) {
-        this.macAddress = macAddress;
     }
 
     public void setColorClicked(int colorClicked) {

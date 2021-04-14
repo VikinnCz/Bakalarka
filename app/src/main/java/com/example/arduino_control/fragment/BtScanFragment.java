@@ -3,6 +3,7 @@ package com.example.arduino_control.fragment;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -10,9 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.arduino_control.R;
@@ -69,7 +74,7 @@ public class BtScanFragment extends Fragment {
         if(pairedDevices.size()>0){
             pairedDeviceList.addAll(pairedDevices);
         }
-        AddDeviceActivity.PairedDeviceAdapter mAdapter = new AddDeviceActivity.PairedDeviceAdapter(getContext(),R.layout.item_list,R.id.BtName, pairedDeviceList);
+       PairedDeviceAdapter mAdapter = new PairedDeviceAdapter(getContext(), R.layout.item_list, R.id.BtName, pairedDeviceList);
         mListView.setAdapter(mAdapter);
 
         mListView.setOnItemClickListener((parent, view, position, id) -> {
@@ -91,7 +96,7 @@ public class BtScanFragment extends Fragment {
         LayoutInflater inflater = this.getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_layout, null);
 
-        final EditText mOurName = (EditText) view.findViewById(R.id.ourName);
+        final EditText mOurName = view.findViewById(R.id.ourName);
 
         builder.setView(view)
                 .setTitle("Rename")
@@ -109,7 +114,45 @@ public class BtScanFragment extends Fragment {
      * Call function cancelActivityWithResult from AddDevice Activity which send selected device with name to MainActivity.
      */
     public void cancel(){
-        ((AddDeviceActivity)this.getActivity()).cancelActivityWithResult(mDevice,ourName);
+        ((AddDeviceActivity) this.requireActivity()).cancelActivityWithResult(mDevice,ourName);
+    }
+
+    public static class PairedDeviceAdapter extends ArrayAdapter<BluetoothDevice> {
+        Context context;
+        List<BluetoothDevice> myList;
+
+        public PairedDeviceAdapter(Context context, int resource, int textViewResourceId, List<BluetoothDevice> objects) {
+            super(context, resource, textViewResourceId, objects);
+            this.context = context;
+            this.myList = objects;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            View v = convertView;
+            PairedDeviceAdapter.ViewHolder holder;
+            if (convertView == null) {
+                v = LayoutInflater.from(context).inflate(R.layout.item_list, parent);
+                holder = new PairedDeviceAdapter.ViewHolder();
+
+                holder.name = v.findViewById(R.id.BtName);
+
+                v.setTag(holder);
+            } else {
+                holder = (PairedDeviceAdapter.ViewHolder) v.getTag();
+            }
+
+            BluetoothDevice device = myList.get(position);
+            String deviceDescription = device.getName() + "\n " + device.getAddress();
+            holder.name.setText(deviceDescription);
+
+            return v;
+        }
+
+        private static class ViewHolder{
+            TextView name;
+        }
     }
 
 }

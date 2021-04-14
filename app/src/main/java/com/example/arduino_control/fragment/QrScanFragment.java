@@ -81,7 +81,7 @@ public class QrScanFragment extends Fragment {
         LayoutInflater inflater = this.getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_layout, null);
 
-        final EditText mOurName = (EditText) view.findViewById(R.id.ourName);
+        final EditText mOurName = view.findViewById(R.id.ourName);
 
         builder.setView(view)
                 .setTitle("Rename")
@@ -99,7 +99,7 @@ public class QrScanFragment extends Fragment {
      * Call function cancelActivityWithResult from AddDevice Activity which send selected device with name to MainActivity.
      */
     public void cancel(){
-        ((AddDeviceActivity)this.getActivity()).cancelActivityWithResult(mDevice,ourName);
+        ((AddDeviceActivity) this.requireActivity()).cancelActivityWithResult(mDevice,ourName);
     }
 
     @Override
