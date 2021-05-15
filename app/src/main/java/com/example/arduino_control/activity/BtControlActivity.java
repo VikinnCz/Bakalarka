@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
+//TODO: Add coments
 public class BtControlActivity extends AppCompatActivity {
 
     private static final String TAG = BtControlActivity.class.getName();
