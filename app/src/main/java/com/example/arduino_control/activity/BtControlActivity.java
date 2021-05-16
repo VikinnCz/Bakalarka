@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
-//TODO: Add coments
 /**
  * Activity class which contains all features for user to control servo.
  * @author Vikinn
