@@ -38,6 +38,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 //TODO: Add coments
+/**
+ * Activity class which contains all features for user to control servo.
+ * @author Vikinn
+ */
 public class BtControlActivity extends AppCompatActivity {
 
     private static final String TAG = BtControlActivity.class.getName();
@@ -72,6 +76,7 @@ public class BtControlActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_empty);
 
+        // Getting data from MainActivity
         Intent intent = getIntent();
         Bundle b = intent.getExtras();
         user = (User) intent.getSerializableExtra(MainActivity.USER);
@@ -81,8 +86,8 @@ public class BtControlActivity extends AppCompatActivity {
         listOfPresets = ourDevice.getListOfPresets();
         listOfPresetsAdapter = new ListOfPresetsAdapter(getApplicationContext(), R.layout.item_preset, listOfPresets);
 
+        // Start connecting to bluetooth
         openDialogConnecting();
-
         startConnecting();
     }
 
@@ -102,6 +107,10 @@ public class BtControlActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Manage connecting with class ConnectingToBT and wait until Bluetooth module is connect. Function waiting 5s to for connet and then clos activity.
+     * If is connection successful user can control servos.
+     */
     public void startConnecting() {
         BluetoothDevice btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(user.getOurDeviceList().get(positionInDeviceList).getMacAddress());
         c = new ConnectingToBT(btDevice);
@@ -136,6 +145,10 @@ public class BtControlActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Chack if user set this device or not.
+     * If device is not set then open dialog for set device.
+     */
     public void isDeviceSet() {
         if (ourDevice.isSet) {
             setView();
@@ -144,6 +157,9 @@ public class BtControlActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sets the view according to user parameters about device.
+     */
     private void setView() {
 
         setContentView(R.layout.activity_bt_control);
@@ -214,23 +230,29 @@ public class BtControlActivity extends AppCompatActivity {
         renameKnobs();
     }
 
+    /**
+     * Open dialog for setKnob on long click
+     */
     private void renameKnobs(){
         knob1NameView.setOnLongClickListener(v -> {
-            openDialogSetKnob(0);
+            openDialogRenameKnob(0);
             return true;
         });
 
         knob2NameView.setOnLongClickListener(v -> {
-            openDialogSetKnob(1);
+            openDialogRenameKnob(1);
             return true;
         });
 
         knob3NameView.setOnLongClickListener(v -> {
-            openDialogSetKnob(2);
+            openDialogRenameKnob(2);
             return true;
         });
     }
 
+    /**
+     * Add next knob max knob of device is 3.
+     */
     private void addKnobs() {
         knob2Add.setOnClickListener(v -> {
             manager.write(KNOB_2_MIN.getBytes());
@@ -245,6 +267,9 @@ public class BtControlActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * When user mov with seek bar, this function read new value and send via bluetooth.
+     */
     public void takeData() {
         controller_01.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -301,6 +326,9 @@ public class BtControlActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Show when connecting to bluetooth. This dialog is non cancelable
+     */
     protected void openDialogConnecting() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -311,6 +339,9 @@ public class BtControlActivity extends AppCompatActivity {
         mDialog.show();
     }
 
+    /**
+     * Set all knobs to zero position and start setup sequence.
+     */
     private void openDialogSetNewDevice() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Nejprve je potřeba vše nastavit");
@@ -327,6 +358,9 @@ public class BtControlActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * There user must put device to his effect.
+     */
     private void openDialogPutDevice() {
         mDialog.dismiss();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -338,6 +372,9 @@ public class BtControlActivity extends AppCompatActivity {
         mDialog.show();
     }
 
+    /**
+     * Set maximum range of effect knob 1.
+     */
     private void openDialogSetKnob1() {
         mDialog.dismiss();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -379,6 +416,9 @@ public class BtControlActivity extends AppCompatActivity {
         mDialog.show();
     }
 
+    /**
+     * Set maximum range of effect knob 2.
+     */
     private void openDialogSetKnob2() {
         mDialog.dismiss();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -427,6 +467,9 @@ public class BtControlActivity extends AppCompatActivity {
         mDialog.show();
     }
 
+    /**
+     * Set maximum range of effect knob 3.
+     */
     private void openDialogSetKnob3() {
         mDialog.dismiss();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -477,6 +520,9 @@ public class BtControlActivity extends AppCompatActivity {
         mDialog.show();
     }
 
+    /**
+     * Manage presets, there user can load preset or create new.
+     */
     private void openDialogPresets() {
         mDialog.dismiss();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -490,6 +536,7 @@ public class BtControlActivity extends AppCompatActivity {
 
         builder.setView(view);
         builder.setTitle("Presety");
+        // add new preset
         builder.setPositiveButton("Přidat", (dialog, which) -> openDialogGetPresetName()); // save preset
         builder.setNegativeButton("Odejít", (dialog, which) -> {
         });
@@ -532,11 +579,14 @@ public class BtControlActivity extends AppCompatActivity {
         });
 
         listViewOfPresets.setOnItemLongClickListener((parent, view12, position, id) -> {
-            openDialogChangePreset(position);
+            openDialogRenamePreset(position);
             return true;
         });
     }
 
+    /**
+     * Save new preset, get name from user and parameters of knobs.
+     */
     public void openDialogGetPresetName() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -572,7 +622,7 @@ public class BtControlActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public void openDialogChangePreset(int position) {
+    public void openDialogRenamePreset(int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         LayoutInflater inflater = getLayoutInflater();
@@ -594,7 +644,7 @@ public class BtControlActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public void openDialogSetKnob(int knob){
+    public void openDialogRenameKnob(int knob){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         LayoutInflater inflater = this.getLayoutInflater();
@@ -603,7 +653,7 @@ public class BtControlActivity extends AppCompatActivity {
         final EditText mOurName = v.findViewById(R.id.ourName);
 
         builder.setView(v)
-                .setTitle("Upravit")
+                .setTitle("Přejmenovat")
                 .setNegativeButton("Zavřít", (dialog, which) -> {})
                 .setPositiveButton("ok", (dialog, which) -> {
                     String newName = mOurName.getText().toString();
@@ -625,6 +675,9 @@ public class BtControlActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    /**
+     * Save user data to firebase server.
+     */
     public void saveData() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseFirestore dataBase = FirebaseFirestore.getInstance();
@@ -671,6 +724,10 @@ public class BtControlActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    /**
+     * Internal class which managing connection to Bluetooth device with bluetooth socket.
+     * @author Vikinn
+     */
     private class ConnectingToBT extends Thread {
 
         private final BluetoothSocket mnSocket;
@@ -688,6 +745,9 @@ public class BtControlActivity extends AppCompatActivity {
             mnSocket = tmp;
         }
 
+        /**
+         * Start new thread for connect to bluetooth device and return connected bluetooth socket.
+         */
         public void run() {
             BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
 
@@ -696,7 +756,6 @@ public class BtControlActivity extends AppCompatActivity {
                 Log.d(TAG, "run: Connected");
             } catch (IOException e) {
                 Log.e(TAG, "Could not connect client socket.", e);
-//                runOnUiThread(()->Toast.makeText(BtControlActivity.this, "Could not connect to client.", Toast.LENGTH_LONG).show());
                 try {
                     mnSocket.close();
                     return;
@@ -708,10 +767,16 @@ public class BtControlActivity extends AppCompatActivity {
             manager = new ManageConnection(mnSocket);
         }
 
+        /**
+         * Get connection status
+         */
         public boolean isConnect() {
             return mnSocket.isConnected();
         }
 
+        /**
+         * Test if bluetooth socket is connected
+         */
         public void test() {
             if (!mnSocket.isConnected()) {
                 c.cancel();
@@ -728,6 +793,10 @@ public class BtControlActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Internal class witch is responsible for writing data to Bluetooth device with bluetooth socket.
+     * @author Vikinn
+     */
     private class ManageConnection extends Thread {
         private final BluetoothSocket mmSocket;
         private final OutputStream mmOutputStream;
@@ -747,13 +816,16 @@ public class BtControlActivity extends AppCompatActivity {
 
         }
 
+        /**
+         * Sending data to bluetooth device with interval 20 ms to avoid device buffer congestion.
+         */
         public void write(byte[] bytes) {
             if (!sending) {
                 try {
                     sending = true;
                     mmOutputStream.write(bytes);
                     Log.d(TAG, "send: " + data);
-                    new Thread(() -> { //TODO: Stále doje po chvíli k zahlcení řešení může být upravit kód v arduinu aby mazal buffer
+                    new Thread(() -> {
                         try {
                             Thread.sleep(20);
                             sending = false;
@@ -771,6 +843,9 @@ public class BtControlActivity extends AppCompatActivity {
             }
         }
 
+        /**
+         * Every data send with this method must be send immediately to bluetooth device.
+         */
         public void writeAbsolutely(byte[] bytes) {
             try {
                 mmOutputStream.write(bytes);
