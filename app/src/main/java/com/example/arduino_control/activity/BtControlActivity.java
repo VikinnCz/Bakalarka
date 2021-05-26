@@ -44,9 +44,9 @@ import java.util.UUID;
 public class BtControlActivity extends AppCompatActivity {
 
     private static final String TAG = BtControlActivity.class.getName();
-    private static final String KNOB_1_MIN = "0\n";
-    private static final String KNOB_2_MIN = "181\n";
-    private static final String KNOB_3_MIN = "361\n";
+    private static final String KNOB_1_MIN = "1\n";
+    private static final String KNOB_2_MIN = "182\n";
+    private static final String KNOB_3_MIN = "363\n";
 
     private SeekBar controller_01;
     private SeekBar controller_02;
