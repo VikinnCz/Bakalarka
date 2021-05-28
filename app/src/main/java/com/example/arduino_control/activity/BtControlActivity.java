@@ -44,9 +44,9 @@ import java.util.UUID;
 public class BtControlActivity extends AppCompatActivity {
 
     private static final String TAG = BtControlActivity.class.getName();
-    private static final String KNOB_1_MIN = "0\n";
-    private static final String KNOB_2_MIN = "181\n";
-    private static final String KNOB_3_MIN = "361\n";
+    private static final String KNOB_1_MIN = "1\n";
+    private static final String KNOB_2_MIN = "182\n";
+    private static final String KNOB_3_MIN = "363\n";
 
     private SeekBar controller_01;
     private SeekBar controller_02;
@@ -344,7 +344,7 @@ public class BtControlActivity extends AppCompatActivity {
     private void openDialogSetNewDevice() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Nejprve je potřeba vše nastavit");
-        builder.setMessage("Sundejte zařízení s efektu a okotče knoby na minimul do leva. Následně stiskněte ok.");
+        builder.setMessage("Sundejte zařízení s efektu a ototče knoby na minimum do leva. Následně stiskněte ok.");
         builder.setPositiveButton("Ok", (dialog, which) -> {
             manager.writeAbsolutely(KNOB_1_MIN.getBytes());
             manager.writeAbsolutely(KNOB_2_MIN.getBytes());
@@ -404,7 +404,7 @@ public class BtControlActivity extends AppCompatActivity {
 
         builder.setView(view);
         builder.setTitle("Nastavte maximálni hodnotu knobu 1");
-        builder.setMessage("Pomalu posunujte slidrem z leva do prava než dojedete na maximální úhel otočení vašeho knobu. Následně stiskněte ok.");
+        builder.setMessage("Pomalu posunujte posuvníkem z leva do prava než dojedete na maximální úhel otočení vašeho knobu. Následně stiskněte ok.");
         builder.setPositiveButton("Ok", ((dialog, which) -> {
             ourDevice.getMax().set(0, knob1Max.getProgress());
             ourDevice.getNames().set(0, knob1Name.getText().toString());
