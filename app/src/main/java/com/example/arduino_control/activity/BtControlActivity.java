@@ -58,7 +58,7 @@ public class BtControlActivity extends AppCompatActivity {
     private Button knob3Add;
     private User user;
     private OurDevice ourDevice;
-    private ConnectingToBT c;
+    private ConnectingToBT bluetoothConnect;
     private ManageConnection manager;
     private ListOfPresetsAdapter listOfPresetsAdapter;
     Dialog mDialog;
@@ -112,13 +112,13 @@ public class BtControlActivity extends AppCompatActivity {
      */
     public void startConnecting() {
         BluetoothDevice btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(user.getOurDeviceList().get(positionInDeviceList).getMacAddress());
-        c = new ConnectingToBT(btDevice);
-        c.start();
+        bluetoothConnect = new ConnectingToBT(btDevice);
+        bluetoothConnect.start();
         Log.d(TAG, "startConnecting: ");
         new Thread(() -> {
             for (int i = 0; i <= 50; i++) {
                 Log.d(TAG, "Connecting: " + i);
-                if (c.isConnect()) {
+                if (bluetoothConnect.isConnect()) {
                     runOnUiThread(() -> {
                         mDialog.dismiss();
                         isDeviceSet();
@@ -688,7 +688,7 @@ public class BtControlActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        c.test();
+        bluetoothConnect.test();
     }
 
     @Override
@@ -703,7 +703,7 @@ public class BtControlActivity extends AppCompatActivity {
         resultIntent.putExtra("user", user);
         setResult(RESULT_OK, resultIntent);
         try {
-            c.cancel();
+            bluetoothConnect.cancel();
             manager.cancel();
         } catch (NullPointerException e) {
             Log.d(TAG, "onDestroy: socket is canceled");
@@ -715,7 +715,7 @@ public class BtControlActivity extends AppCompatActivity {
     protected void onDestroy() {
         saveData();
         try {
-            c.cancel();
+            bluetoothConnect.cancel();
             manager.cancel();
         } catch (NullPointerException e) {
             Log.d(TAG, "onDestroy: socket is canceled");
@@ -778,7 +778,7 @@ public class BtControlActivity extends AppCompatActivity {
          */
         public void test() {
             if (!mnSocket.isConnected()) {
-                c.cancel();
+                bluetoothConnect.cancel();
                 startConnecting();
             }
         }
@@ -835,7 +835,7 @@ public class BtControlActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     Log.e(TAG, "Could not send data to device." + data);
                     if (mmSocket.isConnected()) {
-                        c.cancel();
+                        bluetoothConnect.cancel();
                     }
                     startConnecting();
                 }
@@ -854,7 +854,7 @@ public class BtControlActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e(TAG, "Could not send data to device." + data);
                 if (mmSocket.isConnected()) {
-                    c.cancel();
+                    bluetoothConnect.cancel();
                 }
                 startConnecting();
             }
